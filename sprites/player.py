@@ -12,11 +12,14 @@ class Player(GameSprite):
 
     def control(self, dt):
         if KEYBOARD[key.D]:
-            self.x += self.speed * dt
+            self.update_forces(move=Vec2(self.speed, 0))
             self.scale_x = 1
-        if KEYBOARD[key.A]:
-            self.x -= self.speed * dt
+        elif KEYBOARD[key.A]:
+            self.update_forces(move=Vec2(-self.speed, 0))
             self.scale_x = -1
+        else:
+            self.update_forces(move=Vec2(0, 0))
+
         if KEYBOARD[key.SPACE]:
             self.velocity = Vec2(self.velocity.x, PLAYER_JUMP_POWER)
 
