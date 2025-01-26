@@ -31,9 +31,9 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
     def update_velocity(self, acceleration: Vec2, dt):
         self.velocity += acceleration * dt
 
-    def update_position(self):
-        self.x += self.velocity.x
-        self.y += self.velocity.y
+    def update_position(self, dt):
+        self.x += self.velocity.x*dt
+        self.y += self.velocity.y*dt
 
     def collide(self, other: "PhysObject"):
         if isinstance(other, PhysObject):
@@ -51,14 +51,14 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
                 dx = min(self.right - other.left, other.right - self.left)
                 dy = min(self.top - other.bottom, other.top - self.bottom)
                 if dx < dy:
-                    if other.left < self.left <= other.right:
+                    if other.left < self.left < other.right:
                         normal = Vec2(1, 0)
                         self.left = other.right
                     else:
                         normal = Vec2(-1, 0)
                         self.right = other.left
                 else:
-                    if other.bottom < self.bottom <= other.top:
+                    if other.bottom < self.bottom < other.top:
                         normal = Vec2(0, 1)
                         self.bottom = other.top
                     else:

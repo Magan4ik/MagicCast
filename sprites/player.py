@@ -28,4 +28,4 @@ class Player(GameSprite):
         self.control(dt)
         acceleration = self.calculate_acceleration()
         self.update_velocity(acceleration, dt)
-        self.update_position()
+        self.update_position(dt)

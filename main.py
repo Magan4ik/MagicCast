@@ -12,8 +12,8 @@ class Window(pyglet.window.Window):
         super().__init__(*args, **kwargs)
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
-        self.player = Player(player_walk_images, 200, 500, 40, 80, 50, batch=ALL_OBJECTS)
-        self.player.update_forces(gravity=Vec2(0, -125))
+        self.player = Player(player_walk_images, 200, 500, 40, 80, 5000, batch=ALL_OBJECTS)
+        self.player.update_forces(gravity=Vec2(0, -10000))
         self.block = GameSprite(block_images, 200, 250, 50, 50, ALL_OBJECTS,
                                 mass=5, elastic=1)
         self.block2 = GameSprite(block_images, 250, 250, 50, 50, ALL_OBJECTS,
@@ -25,7 +25,7 @@ class Window(pyglet.window.Window):
         self.objects = [self.player, self.block, self.block2, self.block3, self.block4]
 
     def air_resistance_force(self, width, height, velocity: pyglet.math.Vec2):
-        Cd = 0.5
+        Cd = 0.01
         rho = 0.1
 
         speed = velocity.length()
@@ -78,7 +78,7 @@ class Window(pyglet.window.Window):
         self.block.hitbox.draw()
         ALL_OBJECTS.draw()
         for force in self.player.forces.values():
-            line = pyglet.shapes.Line(self.player.x, self.player.y, self.player.x + force.x, self.player.y + force.y,
+            line = pyglet.shapes.Line(self.player.x, self.player.y, self.player.x + force.x//100, self.player.y + force.y//100,
                                       color=(200, 100, 100))
             line.draw()
         self.fps_display.draw()
