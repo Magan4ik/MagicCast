@@ -67,17 +67,23 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
                 acceleration = self.calculate_acceleration()
                 force = self.mass * acceleration
                 normal_force = -force.dot(normal)
-                normal *= normal_force
-                forces = {f"normal_reaction_{id(self)}": normal}
-                self.update_forces(**forces)
+                normal_react = normal * normal_force
                 total_elastic = (self.elastic*other.elastic)/(self.elastic+other.elastic)
-                new_velocity = -total_elastic*self.velocity
+                normal_component = normal * self.velocity.dot(normal)
+                new_velocity = (self.velocity - normal_component) + (-normal_component * total_elastic)
                 self_impulse = self.mass * self.velocity
                 other_impulse = other.mass * other.velocity
                 new_other_impulse = self_impulse + other_impulse - (self.mass*new_velocity)
                 new_other_velocity = new_other_impulse / other.mass
+                tangent = pyglet.math.Vec2(-normal.y, normal.x).normalize()
+                tangent_direction = tangent if new_velocity.dot(tangent) > 0 else -tangent
+                friction_magnitude = FRICTION_MU * normal_react.length()
+                friction = -tangent_direction * friction_magnitude
+                forces = {f"normal_reaction_{id(other)}": normal_react, f"friction_{id(other)}": friction}
+                self.update_forces(**forces)
                 other.velocity = new_other_velocity
                 self.velocity = new_velocity
             else:
-                self.remove_force(f"normal_reaction_{id(self)}")
+                self.remove_force(f"normal_reaction_{id(other)}")
+                self.remove_force(f"friction_{id(other)}")
 

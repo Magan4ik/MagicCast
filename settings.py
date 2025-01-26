@@ -9,13 +9,14 @@ HEIGHT = 500
 FULLSCREEN = False
 FPS = 60
 DEFAULT_MASS = 5
+FRICTION_MU = 0.3
 
 KEYBOARD = key.KeyStateHandler()
 ALL_OBJECTS = pyglet.graphics.Batch()
 
 # PLAYER SETTINGS
 PLAYER_MASS = 10
-PLAYER_ELASTIC = 0.8
+PLAYER_ELASTIC = 1
 PLAYER_JUMP_POWER = 5
 
 BACKGROUND_IMAGE = pyglet.image.load('textures/map/background_game.png')
