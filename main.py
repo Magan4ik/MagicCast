@@ -12,13 +12,19 @@ class Window(pyglet.window.Window):
         super().__init__(*args, **kwargs)
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
-        self.player = Player(player_walk_images, 200, 500, 40, 80, 100, batch=ALL_OBJECTS)
+        self.player = Player(player_walk_images, 200, 500, 40, 80, 50, batch=ALL_OBJECTS)
         self.player.update_forces(gravity=Vec2(0, -125))
         self.block = GameSprite(block_images, 200, 250, 50, 50, ALL_OBJECTS,
-                                mass=5, elastic=0.3)
-        self.objects = [self.player, self.block]
+                                mass=5, elastic=1)
+        self.block2 = GameSprite(block_images, 250, 250, 50, 50, ALL_OBJECTS,
+                                 mass=5, elastic=1)
+        self.block3 = GameSprite(block_images, 300, 250, 50, 50, ALL_OBJECTS,
+                                 mass=5, elastic=1)
+        self.block4 = GameSprite(block_images, 400, 250, 50, 40, ALL_OBJECTS,
+                                 mass=5, elastic=1)
+        self.objects = [self.player, self.block, self.block2, self.block3, self.block4]
 
-    def air_resistance_force(self, mass, width, height, velocity: pyglet.math.Vec2):
+    def air_resistance_force(self, width, height, velocity: pyglet.math.Vec2):
         Cd = 0.5
         rho = 0.1
 
@@ -39,16 +45,18 @@ class Window(pyglet.window.Window):
 
         return force
 
-    def do_friction(self):
-        for obj in self.objects:
-            if isinstance(obj, PhysObject):
-                friction = self.air_resistance_force(obj.mass, obj.width, obj.height, obj.velocity)
-                obj.update_forces(air_friction=friction)
+    def do_friction(self, obj):
+        friction = self.air_resistance_force(obj.width, obj.height, obj.velocity)
+        obj.update_forces(air_friction=friction)
 
     def update(self, dt):
         self.player.handle(dt)
-        self.player.calculate_collide(self.block)
-        self.do_friction()
+        for obj in self.objects:
+            if not isinstance(obj, Player):
+                self.player.calculate_collide(obj)
+                self.do_friction(obj)
+            else:
+                self.do_friction(obj)
 
     def on_key_press(self, sym, mod):
         if sym == key.ESCAPE:
@@ -71,7 +79,7 @@ class Window(pyglet.window.Window):
         ALL_OBJECTS.draw()
         for force in self.player.forces.values():
             line = pyglet.shapes.Line(self.player.x, self.player.y, self.player.x + force.x, self.player.y + force.y,
-                                      color=(200, 100, 100 ))
+                                      color=(200, 100, 100))
             line.draw()
         self.fps_display.draw()
 
