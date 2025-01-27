@@ -15,7 +15,7 @@ class Window(pyglet.window.Window):
         BACKGROUND_IMAGE.get_texture().height = self.height
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
-        self.player = Player(player_walk_images, self.width // 2, self.height // 2, 40, 80, 5000, batch=ALL_OBJECTS)
+        self.player = Player(player_walk_images, self.width // 2, self.height // 2, 40, 80, 150, batch=None)
         self.player.update_forces(gravity=Vec2(0, -10000))
         self.map_manager = MapManager(self.player)
         self.map_manager.load_map("map_sheets/map1.txt", 0, 0)
@@ -71,12 +71,12 @@ class Window(pyglet.window.Window):
         self.clear()
         BACKGROUND_IMAGE.blit(0, 0)
         self.map_manager.render()
-        self.player.hitbox.draw()
-        ALL_OBJECTS.draw()
-        for force in self.player.forces.values():
-            line = pyglet.shapes.Line(self.player.x, self.player.y, self.player.x + force.x//100, self.player.y + force.y//100,
-                                      color=(200, 100, 100))
-            line.draw()
+        # self.player.hitbox.draw()
+        # for force in self.player.forces.values():
+        #     line = pyglet.shapes.Line(self.player.x, self.player.y, self.player.x + force.x//100, self.player.y + force.y//100,
+        #                               color=(200, 100, 100))
+        #     line.draw()
+        self.player.draw()
         self.fps_display.draw()
 
 
