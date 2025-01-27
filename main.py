@@ -1,6 +1,7 @@
 from pyglet.math import Vec2
 
 from base_classes.game_sprite import GameSprite
+from map.map_manager import MapManager
 from settings import *
 from sprites.player import Player
 from pyglet.window import FPSDisplay, key
@@ -10,19 +11,14 @@ from base_classes.physical_object import PhysObject
 class Window(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        BACKGROUND_IMAGE.get_texture().width = self.width
+        BACKGROUND_IMAGE.get_texture().height = self.height
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
-        self.player = Player(player_walk_images, 200, 500, 40, 80, 5000, batch=ALL_OBJECTS)
+        self.player = Player(player_walk_images, self.width // 2, self.height // 2, 40, 80, 5000, batch=ALL_OBJECTS)
         self.player.update_forces(gravity=Vec2(0, -10000))
-        self.block = GameSprite(block_images, 200, 250, 50, 50, ALL_OBJECTS,
-                                mass=5, elastic=1)
-        self.block2 = GameSprite(block_images, 250, 250, 50, 50, ALL_OBJECTS,
-                                 mass=5, elastic=1)
-        self.block3 = GameSprite(block_images, 300, 250, 50, 50, ALL_OBJECTS,
-                                 mass=5, elastic=1)
-        self.block4 = GameSprite(block_images, 400, 250, 50, 40, ALL_OBJECTS,
-                                 mass=5, elastic=1)
-        self.objects = [self.player, self.block, self.block2, self.block3, self.block4]
+        self.map_manager = MapManager(self.player)
+        self.map_manager.load_map("map_sheets/map1.txt", 0, 0)
 
     def air_resistance_force(self, width, height, velocity: pyglet.math.Vec2):
         Cd = 0.01
@@ -51,12 +47,12 @@ class Window(pyglet.window.Window):
 
     def update(self, dt):
         self.player.handle(dt)
-        for obj in self.objects:
-            if not isinstance(obj, Player):
+        for chunk in self.map_manager.get_closes_chunks():
+            for obj in chunk.sprites:
                 self.player.calculate_collide(obj)
                 self.do_friction(obj)
-            else:
-                self.do_friction(obj)
+        self.do_friction(self.player)
+        self.map_manager.update_target()
 
     def on_key_press(self, sym, mod):
         if sym == key.ESCAPE:
@@ -74,8 +70,8 @@ class Window(pyglet.window.Window):
     def on_draw(self):
         self.clear()
         BACKGROUND_IMAGE.blit(0, 0)
+        self.map_manager.render()
         self.player.hitbox.draw()
-        self.block.hitbox.draw()
         ALL_OBJECTS.draw()
         for force in self.player.forces.values():
             line = pyglet.shapes.Line(self.player.x, self.player.y, self.player.x + force.x//100, self.player.y + force.y//100,
