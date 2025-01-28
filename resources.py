@@ -16,6 +16,10 @@ player_idle_images = [
     pyglet.resource.image('hero/stay.png'),
 ]
 block_images = [pyglet.resource.image('map/platform_1.png')]
-
-# PLAYER_WALK_R_ANIMATION = pyglet.image.Animation.from_image_sequence(_player_walk_r_images, duration=0.1, loop=True)
-# PLAYER_IDLE_R_ANIMATION = pyglet.image.Animation.from_image_sequence(_player_idle_r_images, duration=0.1, loop=True)
+block2_images = [pyglet.resource.image('map/platform_2.png')]
+block3_images = [pyglet.resource.image('map/platform_3.png')]
+block4_images = [pyglet.resource.image('map/platform_4.png')]
+block_tile1 = 'textures/map/platform_1.png'
+block_tile2 = 'textures/map/platform_2.png'
+block_tile3 = 'textures/map/platform_3.png'
+block_tile4 = 'textures/map/platform_4.png'

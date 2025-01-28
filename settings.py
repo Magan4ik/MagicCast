@@ -12,7 +12,8 @@ DEFAULT_MASS = 5
 FRICTION_MU = 0.8
 
 MAP_CELL_SIZE = 50
-CHUNK_RENDER_RANGE = 16
+CHUNK_RENDER_RANGE = 20
+CHUNK_SIZE = 3
 
 KEYBOARD = key.KeyStateHandler()
 ALL_OBJECTS = pyglet.graphics.Batch()
@@ -22,4 +23,4 @@ PLAYER_MASS = 20
 PLAYER_ELASTIC = 0.8
 PLAYER_JUMP_POWER = 250
 
-BACKGROUND_IMAGE = pyglet.image.load('textures/map/background_game.png')
+BACKGROUND_IMAGE_PATH = 'textures/map/background_game.png'

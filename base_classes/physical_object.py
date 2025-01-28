@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pyglet.math import Vec2
 
 from base_classes.coordinate_object import CoordinateObject
@@ -8,7 +10,7 @@ from settings import *
 class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
     def __init__(self, img: pyglet.image.AbstractImage | pyglet.image.Animation,
                  x: float, y: float, width: int, height: int,
-                 batch: pyglet.graphics.Batch, mass: float = DEFAULT_MASS, elastic: float = 0):
+                 batch: Optional[pyglet.graphics.Batch], mass: float = DEFAULT_MASS, elastic: float = 0):
         super().__init__(img, x, y, batch=batch)
         self.forces = {}
         self.velocity = Vec2(0, 0)

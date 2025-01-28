@@ -1,6 +1,7 @@
 from pyglet.math import Vec2
 
 from base_classes.game_sprite import GameSprite
+from base_classes.image import Image
 from map.map_manager import MapManager
 from settings import *
 from sprites.player import Player
@@ -11,29 +12,20 @@ from base_classes.physical_object import PhysObject
 class Window(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        BACKGROUND_IMAGE.get_texture().width = self.width
-        BACKGROUND_IMAGE.get_texture().height = self.height
+        self.background_image = Image(BACKGROUND_IMAGE_PATH, self.width, self.height)
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
         self.player = Player(player_walk_images, self.width // 2, self.height // 2, 40, 80, 150, batch=None)
         self.player.update_forces(gravity=Vec2(0, -10000))
         self.map_manager = MapManager(self.player)
-        self.map_manager.load_map("map_sheets/map1.txt", 0, 0)
+        # self.map_manager.load_map("map_sheets/map1.txt", 0, 0)
+        self.map_manager.load_map_from_bat()
 
     def air_resistance_force(self, width, height, velocity: pyglet.math.Vec2):
-        Cd = 0.01
-        rho = 0.1
-
-        speed = velocity.length()
-        if speed == 0:
-            return pyglet.math.Vec2(0, 0)
-
         area = width if abs(velocity.x) > abs(velocity.y) else height
-
-        force_magnitude = 0.5 * Cd * rho * area * speed ** 2
-
-        force_direction = velocity * (-1 / speed)
-        force = force_direction * force_magnitude
+        if velocity.length() == 0: return Vec2(0, 0)
+        force_direction = velocity * (-1 / velocity.length())
+        force = force_direction * 0.5 * 0.01 * 0.1 * area * velocity.length() ** 2
         if 0 < abs(force.x) < 1e-5:
             force = Vec2(0, force.y)
         if 0 < abs(force.y) < 1e-5:
@@ -69,7 +61,7 @@ class Window(pyglet.window.Window):
 
     def on_draw(self):
         self.clear()
-        BACKGROUND_IMAGE.blit(0, 0)
+        self.background_image.draw(0, 0)
         self.map_manager.render()
         # self.player.hitbox.draw()
         # for force in self.player.forces.values():

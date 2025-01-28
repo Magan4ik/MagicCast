@@ -1,6 +1,9 @@
+import pickle
+
 from base_classes.coordinate_object import CoordinateObject
 from base_classes.game_sprite import GameSprite
 from map.chunk import Chunk
+from map.map_tile import MapTile
 from settings import *
 
 
@@ -16,9 +19,9 @@ class MapManager:
         with open(filename, 'r', encoding='utf-8') as f:
             lines = f.readlines()
             max_width = len(max(lines, key=len))
-            chunks_amount = (max_width + 1) // 2
+            chunks_amount = (max_width + 1) // CHUNK_SIZE
 
-            self.chunks = {x: Chunk(x * MAP_CELL_SIZE * 2) for x in range(chunks_amount)}
+            self.chunks = {x: Chunk(x * MAP_CELL_SIZE * CHUNK_SIZE) for x in range(chunks_amount)}
 
             lines.reverse()
             for y, line in enumerate(lines):
@@ -28,7 +31,7 @@ class MapManager:
                         world_y = y * MAP_CELL_SIZE
                         sprite = GameSprite(block_images, world_x, world_y, MAP_CELL_SIZE, MAP_CELL_SIZE, ALL_OBJECTS,
                                             mass=5, elastic=0.3)
-                        chunk_index = x // 2
+                        chunk_index = x // CHUNK_SIZE
                         self.chunks[chunk_index].add_sprite(sprite)
 
     def _update_delta(self, dx: float, dy: float):
@@ -50,8 +53,33 @@ class MapManager:
     def get_closes_chunks(self):
         x = (self.start_x // MAP_CELL_SIZE) * MAP_CELL_SIZE
         for chunk in self.chunks.values():
-            if x - CHUNK_RENDER_RANGE * MAP_CELL_SIZE <= chunk.x <= x + CHUNK_RENDER_RANGE * MAP_CELL_SIZE:
+            chunk_distance = CHUNK_RENDER_RANGE * MAP_CELL_SIZE * CHUNK_SIZE
+            if x - chunk_distance <= chunk.x <= x + chunk_distance:
                 yield chunk
+
+    def load_map_from_bat(self):
+        with open("map_sheets/map2.bat", "rb") as f:
+            tiles: list[dict] = pickle.load(f)
+            max_x = max(tile["x"] for tile in tiles)
+            chunks_amount = (max_x + MAP_CELL_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
+            self.chunks = {x: Chunk(x * CHUNK_SIZE * MAP_CELL_SIZE) for x in range(chunks_amount)}
+            for tile in tiles:
+                img = pyglet.image.load(tile["image_path"])
+                img = img.get_texture().get_transform(rotate=tile.get("rotation", 0))
+                sprite = GameSprite(
+                    [img],
+                    tile["x"],
+                    tile["y"],
+                    MAP_CELL_SIZE,
+                    MAP_CELL_SIZE,
+                    ALL_OBJECTS,
+                    mass=tile.get("mass", 5),  # По умолчанию mass = 5
+                    elastic=tile.get("elastic", 0.3)  # По умолчанию elastic = 0.3
+                )
+                chunk_index = tile["x"] // (CHUNK_SIZE * MAP_CELL_SIZE)
+
+                if chunk_index in self.chunks:
+                    self.chunks[chunk_index].add_sprite(sprite)
 
     def render(self):
         for chunk in self.get_closes_chunks():
