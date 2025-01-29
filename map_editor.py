@@ -73,6 +73,24 @@ class MapEditor(pyglet.window.Window):
                     self.tiles.remove(block)
                     break
 
+    def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, but: int, modifiers: int):
+        adjusted_x = floor((x - self.dx) / MAP_CELL_SIZE) * MAP_CELL_SIZE
+        adjusted_y = floor((y - self.dy) / MAP_CELL_SIZE) * MAP_CELL_SIZE
+
+        if but == 1:
+            tile = copy(self.block_inventory[self.block_choice])
+            tile.x = adjusted_x
+            tile.y = adjusted_y
+            tile.image.width = MAP_CELL_SIZE
+            tile.image.height = MAP_CELL_SIZE
+            if not any(t.x == adjusted_x and t.y == adjusted_y for t in self.tiles):
+                self.tiles.append(tile)
+        elif but == 4:
+            for block in self.tiles:
+                if block.x == adjusted_x and block.y == adjusted_y:
+                    self.tiles.remove(block)
+                    break
+
     def on_draw(self):
         self.clear()
         self.background_image.draw(0, 0)
