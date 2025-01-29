@@ -22,4 +22,4 @@ block4_images = [pyglet.resource.image('map/platform_4.png')]
 block_tile1 = 'textures/map/platform_1.png'
 block_tile2 = 'textures/map/platform_2.png'
 block_tile3 = 'textures/map/platform_3.png'
-block_tile4 = 'textures/map/platform_4.png'
+block_tile4 = 'textures/map/brick2.png'
