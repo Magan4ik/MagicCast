@@ -3,7 +3,6 @@ import pickle
 from base_classes.coordinate_object import CoordinateObject
 from base_classes.game_sprite import GameSprite
 from map.chunk import Chunk
-from map.map_tile import MapTile
 from settings import *
 
 
@@ -73,8 +72,8 @@ class MapManager:
                     MAP_CELL_SIZE,
                     MAP_CELL_SIZE,
                     ALL_OBJECTS,
-                    mass=tile.get("mass", 5),  # По умолчанию mass = 5
-                    elastic=tile.get("elastic", 0.3)  # По умолчанию elastic = 0.3
+                    mass=tile.get("mass", 5),
+                    elastic=tile.get("elastic", 0.3)
                 )
                 chunk_index = tile["x"] // (CHUNK_SIZE * MAP_CELL_SIZE)
 

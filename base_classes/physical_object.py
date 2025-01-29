@@ -3,7 +3,6 @@ from typing import Optional
 from pyglet.math import Vec2
 
 from base_classes.coordinate_object import CoordinateObject
-from base_classes.hitbox import HitBox
 from settings import *
 
 
@@ -15,7 +14,6 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
         self.forces = {}
         self.velocity = Vec2(0, 0)
         self.mass = mass
-        self.hitbox = HitBox(self.x, self.y, width, height)
         self.elastic = elastic
 
     def update_forces(self, **forces: Vec2):

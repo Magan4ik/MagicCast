@@ -2,8 +2,6 @@ from copy import copy
 from typing import Optional
 
 from base_classes.physical_object import PhysObject
-from base_classes.hitbox import HitBox
-from base_classes.coordinate_object import CoordinateObject
 from settings import *
 
 
@@ -13,7 +11,6 @@ class GameSprite(PhysObject):
                  batch: Optional[pyglet.graphics.Batch], mass: float = DEFAULT_MASS, elastic: float = 0):
         animation = self._make_animation(img_list, width, height)
         super().__init__(animation, x, y, width, height, batch=batch, mass=mass, elastic=elastic)
-        self.hitbox = HitBox(self.left, self.bottom, width, height)
 
     def _make_animation(self, img_list: list[pyglet.image.AbstractImage], width: int, height: int):
         new_list = []

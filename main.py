@@ -1,12 +1,10 @@
 from pyglet.math import Vec2
 
-from base_classes.game_sprite import GameSprite
 from base_classes.image import Image
 from map.map_manager import MapManager
 from settings import *
 from sprites.player import Player
 from pyglet.window import FPSDisplay, key
-from base_classes.physical_object import PhysObject
 
 
 class Window(pyglet.window.Window):
@@ -63,11 +61,6 @@ class Window(pyglet.window.Window):
         self.clear()
         self.background_image.draw(0, 0)
         self.map_manager.render()
-        # self.player.hitbox.draw()
-        # for force in self.player.forces.values():
-        #     line = pyglet.shapes.Line(self.player.x, self.player.y, self.player.x + force.x//100, self.player.y + force.y//100,
-        #                               color=(200, 100, 100))
-        #     line.draw()
         self.player.draw()
         self.fps_display.draw()
 

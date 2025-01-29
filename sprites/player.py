@@ -29,7 +29,6 @@ class Player(GameSprite):
             self.velocity = Vec2(self.velocity.x, PLAYER_JUMP_POWER)
 
     def handle(self, dt):
-        self.hitbox.center = self.position
         self.control(dt)
         acceleration = self.calculate_acceleration()
         self.update_velocity(acceleration, dt)
