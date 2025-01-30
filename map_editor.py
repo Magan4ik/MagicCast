@@ -20,6 +20,7 @@ class MapEditor(pyglet.window.Window):
             MapTile(Image(block_tile2, 100, 100), 120, self.height - 110),
             MapTile(Image(block_tile3, 100, 100), 230, self.height - 110),
             MapTile(Image(block_tile4, 100, 100), 340, self.height - 110),
+            MapTile(Image(block_tile5, 100, 100), 450, self.height - 110),
         ]
         self.tiles = []
         self.dx = 0
@@ -46,6 +47,8 @@ class MapEditor(pyglet.window.Window):
             self.block_choice = 2
         if sym == key._4:
             self.block_choice = 3
+        if sym == key._5:
+            self.block_choice = 4
         if sym == key.R:
             self.block_inventory[self.block_choice].rotate()
         if sym == key.K:
@@ -97,7 +100,7 @@ class MapEditor(pyglet.window.Window):
         for tile in self.tiles:
             tile.draw(self.dx, self.dy)
         pyglet.shapes.Rectangle(0 + 110 * self.block_choice, self.height - 120, 120, 120, (255, 255, 255)).draw()
-        pyglet.shapes.Rectangle(0, self.height - 120, 450, 120, (100, 100, 100)).draw()
+        pyglet.shapes.Rectangle(0, self.height - 120, len(self.block_inventory)*110 + 10, 120, (100, 100, 100)).draw()
         for inv in self.block_inventory:
             inv.draw()
 
