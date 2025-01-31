@@ -37,11 +37,11 @@ class Window(pyglet.window.Window):
         obj.update_forces(air_friction=friction)
 
     def update(self, dt):
-        self.player.handle(dt)
         for chunk in self.map_manager.get_closes_chunks():
             for obj in chunk.sprites:
                 self.player.calculate_collide(obj)
         self.do_friction(self.player)
+        self.player.handle(dt)
 
     def on_key_press(self, sym, mod):
         if sym == key.ESCAPE:

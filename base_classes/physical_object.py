@@ -70,7 +70,12 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
                 tangent = pyglet.math.Vec2(-normal.y, normal.x).normalize()
                 tangent_direction = tangent if new_velocity.dot(tangent) > 0 else -tangent
                 friction_magnitude = other.friction_mu * normal_react.length()
+                if abs(new_velocity.x) < 0.5:
+                    friction_magnitude = 0
+                    new_velocity = Vec2(0, new_velocity.y)
                 friction = -tangent_direction * friction_magnitude
+
+                print(new_velocity)
                 forces = {f"normal_reaction_{id(other)}": normal_react, f"friction_{id(other)}": friction}
                 self.update_forces(**forces)
                 other.velocity = new_other_velocity
