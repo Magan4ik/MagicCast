@@ -21,7 +21,7 @@ class Image:
         self.image.anchor_x = 0
         self.image.anchor_y = 0
 
-    def draw(self, x: int, y: int):
+    def draw(self, x: float, y: float):
         self.image.blit(x, y)
 
     def __copy__(self):

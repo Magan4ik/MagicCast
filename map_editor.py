@@ -18,12 +18,14 @@ class MapEditor(pyglet.window.Window):
         self.push_handlers(KEYBOARD)
         self.block_choice = 0
         self.background_on = False
+        self.tile_batch = pyglet.graphics.Batch()
+        self.block_rotation = 0
         self.block_inventory = [
-            MapTile(Image(block_tile1, 100, 100), 10, self.height - 110),
-            MapTile(Image(block_tile2, 100, 100), 120, self.height - 110),
-            MapTile(Image(block_tile3, 100, 100), 230, self.height - 110),
-            MapTile(Image(block_tile4, 100, 100), 340, self.height - 110),
-            MapTile(Image(block_tile5, 100, 100), 450, self.height - 110),
+            MapTile(Image(block_tile1, 100, 100), 10, self.height - 110, batch=None),
+            MapTile(Image(block_tile2, 100, 100), 120, self.height - 110, batch=None),
+            MapTile(Image(block_tile3, 100, 100), 230, self.height - 110, batch=None),
+            MapTile(Image(block_tile4, 100, 100), 340, self.height - 110, batch=None),
+            MapTile(Image(block_tile5, 100, 100), 450, self.height - 110, batch=None),
         ]
         self.tiles: list[MapTile] = []
         self.dx = 0
@@ -56,7 +58,8 @@ class MapEditor(pyglet.window.Window):
         if sym == key._5:
             self.block_choice = 4
         if sym == key.R:
-            self.block_inventory[self.block_choice].rotate()
+            self.block_inventory[self.block_choice].start_image.rotate()
+            self.block_rotation = self.block_inventory[self.block_choice].start_image.rotation
         if sym == key.B:
             self.background_on = not self.background_on
         if sym == key.K:
@@ -68,12 +71,9 @@ class MapEditor(pyglet.window.Window):
                 pickle.dump(tiles, f)
 
     def create_tile(self, adjusted_x, adjusted_y):
-        print(adjusted_x, adjusted_y)
-        tile = copy(self.block_inventory[self.block_choice])
-        tile.x = adjusted_x
-        tile.y = adjusted_y
-        tile.image.width = MAP_CELL_SIZE
-        tile.image.height = MAP_CELL_SIZE
+        image_path = self.block_inventory[self.block_choice].start_image.filename
+        tile = MapTile(Image(image_path, MAP_CELL_SIZE, MAP_CELL_SIZE), adjusted_x, adjusted_y, batch=self.tile_batch)
+        tile.rotate(self.block_rotation)
         tile.background = self.background_on
         if not any(t.x == adjusted_x and t.y == adjusted_y for t in self.tiles):
             self.tiles.append(tile)
@@ -106,13 +106,14 @@ class MapEditor(pyglet.window.Window):
         self.clear()
         self.background_image.draw(0, 0)
         with self.camera:
-            for tile in self.tiles:
-                tile.draw(0, 0)
+            self.tile_batch.draw()
+            pass
+            # for tile in self.tiles:
+            #     tile.draw()
         pyglet.shapes.Rectangle(0 + 110 * self.block_choice, self.height - 120, 120, 120, (255, 255, 255)).draw()
         pyglet.shapes.Rectangle(0, self.height - 120, len(self.block_inventory)*110 + 10, 120, (100, 100, 100)).draw()
         for inv in self.block_inventory:
             inv.draw()
-
         self.fps_display.draw()
 
 

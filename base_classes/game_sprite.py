@@ -16,7 +16,6 @@ class GameSprite(PhysObject):
     def _make_animation(self, img_list: list[pyglet.image.AbstractImage], width: int, height: int):
         new_list = []
         for img in img_list:
-            img = copy(img)
             texture = img.get_texture()
             texture.width = width
             texture.height = height
