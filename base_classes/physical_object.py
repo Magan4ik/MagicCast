@@ -8,12 +8,14 @@ from settings import *
 
 class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
     def __init__(self, img: pyglet.image.AbstractImage | pyglet.image.Animation,
-                 x: float, y: float, width: int, height: int,
-                 batch: Optional[pyglet.graphics.Batch], mass: float = DEFAULT_MASS, elastic: float = 0):
-        super().__init__(img, x, y, batch=batch)
+                 x: float, y: float, width: int, height: int, batch: Optional[pyglet.graphics.Batch],
+                 mass: float = DEFAULT_MASS, elastic: float = 0, friction_mu: float = DEFAULT_FRICTION_MU,
+                 *args, **kwargs):
+        super().__init__(img, x, y, batch=batch, *args, **kwargs)
         self.forces = {}
         self.velocity = Vec2(0, 0)
         self.mass = mass
+        self.friction_mu = friction_mu
         self.elastic = elastic
 
     def update_forces(self, **forces: Vec2):
@@ -34,16 +36,6 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
     def update_position(self, dt):
         self.x += self.velocity.x*dt
         self.y += self.velocity.y*dt
-
-    def collide(self, other: "PhysObject"):
-        if isinstance(other, PhysObject):
-            return (
-                    self.left < other.right and
-                    self.right > other.left and
-                    self.bottom < other.top and
-                    self.top > other.bottom
-            )
-        raise TypeError("Can't check collision with non-PhysObject object")
 
     def calculate_collide(self, other: "PhysObject"):
         if isinstance(other, PhysObject):
@@ -77,7 +69,7 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
                 new_other_velocity = new_other_impulse / other.mass
                 tangent = pyglet.math.Vec2(-normal.y, normal.x).normalize()
                 tangent_direction = tangent if new_velocity.dot(tangent) > 0 else -tangent
-                friction_magnitude = FRICTION_MU * normal_react.length()
+                friction_magnitude = other.friction_mu * normal_react.length()
                 friction = -tangent_direction * friction_magnitude
                 forces = {f"normal_reaction_{id(other)}": normal_react, f"friction_{id(other)}": friction}
                 self.update_forces(**forces)

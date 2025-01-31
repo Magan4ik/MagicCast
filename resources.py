@@ -3,6 +3,8 @@ import pyglet
 pyglet.resource.path = ['textures']
 pyglet.resource.reindex()
 
+BACKGROUND_IMAGE_PATH = 'textures/map/background_game.png'
+
 player_walk_images = [
     pyglet.resource.image('hero/run_1.png'),
     pyglet.resource.image('hero/run_2.png'),
@@ -16,9 +18,6 @@ player_idle_images = [
     pyglet.resource.image('hero/stay.png'),
 ]
 block_images = [pyglet.resource.image('map/platform_1.png')]
-block2_images = [pyglet.resource.image('map/platform_2.png')]
-block3_images = [pyglet.resource.image('map/platform_3.png')]
-block4_images = [pyglet.resource.image('map/brick4.png')]
 block_tile1 = 'textures/map/platform_1.png'
 block_tile2 = 'textures/map/platform_2.png'
 block_tile3 = 'textures/map/platform_3.png'

@@ -5,7 +5,7 @@ from settings import *
 
 class Image:
     def __init__(self, filename: str, width: int, height: int):
-        self._filename = filename
+        self.filename = filename
         self.image = pyglet.image.load(filename)
         self.texture = self.image.get_texture()
         self.texture.width = width
@@ -25,7 +25,7 @@ class Image:
         self.image.blit(x, y)
 
     def __copy__(self):
-        img = Image(self._filename, self.texture.width, self.texture.height)
+        img = Image(self.filename, self.texture.width, self.texture.height)
         for i in range(self.rotation // 90):
             img.rotate()
         return img
