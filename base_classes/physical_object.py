@@ -3,7 +3,7 @@ from typing import Optional
 from pyglet.math import Vec2
 
 from base_classes.coordinate_object import CoordinateObject
-from settings import *
+from settings.settings import *
 
 
 class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
@@ -75,7 +75,6 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
                     new_velocity = Vec2(0, new_velocity.y)
                 friction = -tangent_direction * friction_magnitude
 
-                print(new_velocity)
                 forces = {f"normal_reaction_{id(other)}": normal_react, f"friction_{id(other)}": friction}
                 self.update_forces(**forces)
                 other.velocity = new_other_velocity

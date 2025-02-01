@@ -1,5 +1,5 @@
 from base_classes.game_sprite import GameSprite
-from settings import *
+from settings.settings import *
 
 
 class Chunk:

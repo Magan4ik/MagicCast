@@ -1,9 +1,7 @@
 from pyglet.math import Vec2
-
-from base_classes.image import Image
-from map.camera import Camera, TargetCamera
+from map.camera import TargetCamera
 from map.map_manager import MapManager
-from settings import *
+from settings.settings import *
 from sprites.player import Player
 from pyglet.window import FPSDisplay, key
 
@@ -11,10 +9,10 @@ from pyglet.window import FPSDisplay, key
 class Window(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.background_image = Image(BACKGROUND_IMAGE_PATH, self.width, self.height)
+        resize_and_center_image(BACKGROUND_IMAGE, self.width, self.height)
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
-        self.player = Player(player_walk_images, self.width // 2 - 100, self.height // 2, 40, 80, PLAYER_SPEED, batch=None)
+        self.player = Player(player_animation, self.width // 2, self.height // 2, 64, 64, PLAYER_SPEED, batch=None)
         self.player.update_forces(gravity=Vec2(0, -10000))
         self.map_manager = MapManager(self.player)
         self.map_manager.load_map_from_bat()
@@ -64,7 +62,7 @@ class Window(pyglet.window.Window):
 
     def on_draw(self):
         self.clear()
-        self.background_image.draw(0, 0)
+        BACKGROUND_IMAGE.blit(self.width // 2, self.height // 2)
         with self.camera:
             self.map_manager.render()
             self.player.draw()

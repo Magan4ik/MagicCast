@@ -1,8 +1,5 @@
-from copy import deepcopy
-
-import pyglet
 from pyglet.window import key
-from resources import *
+from settings.resources import *
 
 WIDTH = 1500
 HEIGHT = 800

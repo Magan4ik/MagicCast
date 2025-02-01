@@ -4,7 +4,7 @@ from base_classes.coordinate_object import CoordinateObject
 from base_classes.game_sprite import GameSprite
 from factories.block_factory import BlockFactory
 from map.chunk import Chunk
-from settings import *
+from settings.settings import *
 
 
 class MapManager:
@@ -52,12 +52,11 @@ class MapManager:
             min_x = min(tile["x"] for tile in tiles)
             chunks_amount = (max_x + MAP_CELL_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
             chunks_start = (min_x + MAP_CELL_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
-            self.chunks = {x: Chunk(x * CHUNK_SIZE * MAP_CELL_SIZE) for x in range(chunks_start, chunks_amount)}
+            self.chunks = {x: Chunk(x * CHUNK_SIZE * MAP_CELL_SIZE) for x in range(chunks_start, chunks_amount + 1)}
             for tile in tiles:
                 sprite = BlockFactory.create_block(tile)
                 sprite.group = TILE_GROUP
                 chunk_index = tile["x"] // (CHUNK_SIZE * MAP_CELL_SIZE)
-
                 if chunk_index in self.chunks:
                     self.chunks[chunk_index].add_sprite(sprite)
 
