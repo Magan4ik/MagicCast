@@ -1,21 +1,28 @@
-from copy import copy
-
-from base_classes.image import Image
-from settings import *
+from settings.settings import *
 
 
-class MapTile:
-    def __init__(self, image: Image, x: int, y: int):
-        self.x = x
-        self.y = y
+class MapTileGroup(pyglet.sprite.SpriteGroup):
+    def set_state(self):
+        glBindTexture(GL_TEXTURE_2D, self.texture.id)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
 
-        self.image = image
 
-    def rotate(self):
-        self.image.rotate()
+class MapTile(pyglet.sprite.Sprite):
 
-    def draw(self, dx=0, dy=0):
-        self.image.draw(self.x + dx, self.y + dy)
+    def __init__(self, name: str, x: int, y: int,
+                 batch: pyglet.graphics.Batch, mu_friction: float):
+        image = tile_images.get(name)
+        super().__init__(image, x, y, batch=batch)
+        self.background = False
+        self.name = name
+        self.mu_friction = mu_friction
 
-    def __copy__(self):
-        return MapTile(copy(self.image), self.x, self.y)
+    def get_data(self):
+        return {"name": self.name,
+                "background": self.background,
+                "rotation": self.rotation,
+                "mu": self.mu_friction,
+                "x": self.x,
+                "y": self.y,
+                }

@@ -1,4 +1,4 @@
-from settings import *
+from settings.settings import *
 
 
 class CoordinateObject:
@@ -11,6 +11,16 @@ class CoordinateObject:
         self._left = self.x
         self._bottom = self.y
         self._right = self.x + self.width
+
+    def collide(self, other: "CoordinateObject"):
+        if isinstance(other, CoordinateObject):
+            return (
+                    self.left < other.right and
+                    self.right > other.left and
+                    self.bottom < other.top and
+                    self.top > other.bottom
+            )
+        raise TypeError("Can't check collision with non-CoordinateObject object")
 
     @property
     def top(self) -> float:

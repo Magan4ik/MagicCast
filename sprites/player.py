@@ -1,6 +1,6 @@
 from typing import Optional
 
-from settings import *
+from settings.settings import *
 from base_classes.game_sprite import GameSprite
 from pyglet.math import Vec2
 
