@@ -11,14 +11,16 @@ class MapManager:
     def __init__(self, target: CoordinateObject):
         self.target = target
         self.chunks: dict[int, Chunk] = {}
+        self.chunks_amount = None
+        self.chunks_min = None
 
     def load_map(self, filename: str):
         with open(filename, 'r', encoding='utf-8') as f:
             lines = f.readlines()
             max_width = len(max(lines, key=len))
-            chunks_amount = (max_width + 1) // CHUNK_SIZE
+            self.chunks_amount = (max_width + 1) // CHUNK_SIZE
 
-            self.chunks = {x: Chunk(x * MAP_CELL_SIZE * CHUNK_SIZE) for x in range(chunks_amount)}
+            self.chunks = {x: Chunk(x * MAP_CELL_SIZE * CHUNK_SIZE) for x in range(self.chunks_amount)}
 
             lines.reverse()
             for y, line in enumerate(lines):
@@ -26,33 +28,35 @@ class MapManager:
                     if sym == "B":
                         world_x = x * MAP_CELL_SIZE
                         world_y = y * MAP_CELL_SIZE
-                        sprite = GameSprite(block_images, world_x, world_y, MAP_CELL_SIZE, MAP_CELL_SIZE, ALL_OBJECTS,
+                        sprite = GameSprite(tile_images["brick"], world_x, world_y, MAP_CELL_SIZE, MAP_CELL_SIZE, ALL_OBJECTS,
                                             mass=5, elastic=0.3)
                         chunk_index = x // CHUNK_SIZE
                         self.chunks[chunk_index].add_sprite(sprite)
 
     def get_visible_chunks(self):
         x = (self.target.x // MAP_CELL_SIZE) * MAP_CELL_SIZE
-        for chunk in self.chunks.values():
-            chunk_distance = CHUNK_RENDER_RANGE * MAP_CELL_SIZE * CHUNK_SIZE
-            if chunk_distance >= abs(x - chunk.x):
-                yield chunk
+        x_left = int(x - CHUNK_RENDER_RANGE * MAP_CELL_SIZE * CHUNK_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
+        x_right = int(x + CHUNK_RENDER_RANGE * MAP_CELL_SIZE * CHUNK_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
+        for key in range(x_left, x_right + 1):
+            if key in self.chunks:
+                yield self.chunks[key]
 
     def get_closes_chunks(self):
         x = (self.target.x // MAP_CELL_SIZE) * MAP_CELL_SIZE
-        for chunk in self.chunks.values():
-            chunk_distance = CHUNK_COLLIDE_RANGE * MAP_CELL_SIZE * CHUNK_SIZE
-            if chunk_distance >= abs(x - chunk.x):
-                yield chunk
+        x_left = int(x - CHUNK_COLLIDE_RANGE * MAP_CELL_SIZE * CHUNK_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
+        x_right = int(x + CHUNK_COLLIDE_RANGE * MAP_CELL_SIZE * CHUNK_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
+        for key in range(x_left, x_right + 1):
+            if key in self.chunks:
+                yield self.chunks[key]
 
     def load_map_from_bat(self):
         with open("map_sheets/map2.bat", "rb") as f:
             tiles: list[dict] = pickle.load(f)
             max_x = max(tile["x"] for tile in tiles)
             min_x = min(tile["x"] for tile in tiles)
-            chunks_amount = (max_x + MAP_CELL_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
-            chunks_start = (min_x + MAP_CELL_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
-            self.chunks = {x: Chunk(x * CHUNK_SIZE * MAP_CELL_SIZE) for x in range(chunks_start, chunks_amount + 1)}
+            self.chunks_amount = (max_x + MAP_CELL_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
+            self.chunks_min = (min_x + MAP_CELL_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
+            self.chunks = {x: Chunk(x * CHUNK_SIZE * MAP_CELL_SIZE) for x in range(self.chunks_min, self.chunks_amount + 1)}
             for tile in tiles:
                 sprite = BlockFactory.create_block(tile)
                 sprite.group = TILE_GROUP
