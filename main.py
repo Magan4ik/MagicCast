@@ -5,11 +5,15 @@ from settings.settings import *
 from sprites.player import Player
 from pyglet.window import FPSDisplay, key
 
+from ui.hot_bar import HotBar
+
 
 class Window(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         resize_and_center_image(BACKGROUND_IMAGE, self.width, self.height)
+        self.hotbar = HotBar(50, self.height - 50, 64, 64, slots_amount=9)
+        self.hotbar.update_selected(3)
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
         self.player = Player(player_animation, self.width // 2, self.height // 2, 64, 64, PLAYER_SPEED, batch=None)
@@ -67,6 +71,7 @@ class Window(pyglet.window.Window):
             self.map_manager.render()
             self.player.draw()
         self.fps_display.draw()
+        self.hotbar.draw()
 
 
 if __name__ == '__main__':

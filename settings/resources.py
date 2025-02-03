@@ -39,3 +39,12 @@ tile_images = {
 for img in tile_images.values():
     resize_and_center_image(img, 50, 50)
     gl_fix_image(img)
+
+
+# UI
+ui_images = {
+    "hotbar_start": pyglet.image.load("textures/ui/hotbar/hotbar_start.png"),
+    "hotbar_end": pyglet.image.load("textures/ui/hotbar/hotbar_end.png"),
+    "hotbar_slot": pyglet.image.load("textures/ui/hotbar/hotbar_slot.png"),
+    "hotbar_slot_selected": pyglet.image.load("textures/ui/hotbar/hotbar_selected_slot.png"),
+}
