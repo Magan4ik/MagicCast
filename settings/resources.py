@@ -23,9 +23,9 @@ BACKGROUND_IMAGE = pyglet.image.load('textures/map/background_game.png')
 
 
 #  PLAYER
-player_grid = pyglet.image.ImageGrid(pyglet.image.load("textures/hero/Player.png"), rows=1, columns=5)
+player_grid = pyglet.image.ImageGrid(pyglet.image.load("textures/hero/Player_anim.png"), rows=1, columns=5)
 for img in player_grid:
-    resize_and_center_image(img, 64, 64)
+    resize_and_center_image(img, 64, 128)
     gl_fix_image(img)
 player_animation = pyglet.image.Animation.from_image_sequence(player_grid, duration=0.25)
 
