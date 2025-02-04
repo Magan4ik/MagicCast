@@ -19,13 +19,13 @@ def gl_fix_image(image):
 
 pyglet.resource.path = ['textures']
 pyglet.resource.reindex()
-BACKGROUND_IMAGE = pyglet.image.load('textures/map/background_game.png')
+BACKGROUND_IMAGE = pyglet.image.load('textures/map/background2.png')
 
 
 #  PLAYER
 player_grid = pyglet.image.ImageGrid(pyglet.image.load("textures/hero/Player_anim.png"), rows=1, columns=5)
 for img in player_grid:
-    resize_and_center_image(img, 64, 128)
+    resize_and_center_image(img, 32, 64)
     gl_fix_image(img)
 player_animation = pyglet.image.Animation.from_image_sequence(player_grid, duration=0.25)
 
@@ -48,3 +48,31 @@ ui_images = {
     "hotbar_slot": pyglet.image.load("textures/ui/hotbar/hotbar_slot.png"),
     "hotbar_slot_selected": pyglet.image.load("textures/ui/hotbar/hotbar_selected_slot.png"),
 }
+
+
+# ITEMS
+item_images = {
+    "staffs": {"wood_staff": pyglet.image.load("textures/items/wood_staff_icon.png")}
+}
+for category in item_images.values():
+    for item in category.values():
+        resize_and_center_image(item, 32, 32)
+
+# STORAGES
+storage_images = {
+    "staffs": {"wood_staff": pyglet.image.load("textures/ui/storages/wood_staff_storage2.png")}
+}
+spell_slot = pyglet.image.load("textures/ui/spell_slot.png")
+resize_and_center_image(spell_slot, 72, 72)
+
+for category in storage_images.values():
+    for storage in category.values():
+        resize_and_center_image(storage, 320, 640)
+
+
+# SPELLS
+spell_icons = [
+    pyglet.image.load("textures/ui/spell_icons/spell_icon_1.png"),
+]
+for spell in spell_icons:
+    resize_and_center_image(spell, 32, 32)

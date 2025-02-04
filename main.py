@@ -6,6 +6,8 @@ from sprites.player import Player
 from pyglet.window import FPSDisplay, key
 
 from ui.hot_bar import HotBar
+from ui.item import Item
+from ui.storage import Storage
 
 
 class Window(pyglet.window.Window):
@@ -13,9 +15,13 @@ class Window(pyglet.window.Window):
         super().__init__(*args, **kwargs)
         resize_and_center_image(BACKGROUND_IMAGE, self.width, self.height)
         self.hotbar = HotBar(50, self.height - 50, 64, 64, slots_amount=9, selected_slot=1)
+        wood_staff_storage = Storage("wood_staff", item_images["staffs"]["wood_staff"], storage_images["staffs"]["wood_staff"],
+                                     0, 0, batch=None, slots_amount=1)
+        self.hotbar.set_item(wood_staff_storage, 2)
+        self.selected_item = None
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
-        self.player = Player(player_animation, self.width // 2, self.height // 2, 64, 64, PLAYER_SPEED, batch=None)
+        self.player = Player(player_animation, self.width // 2, self.height // 2, PLAYER_SPEED, batch=None)
         self.player.update_forces(gravity=Vec2(0, -10000))
         self.map_manager = MapManager(self.player)
         self.map_manager.load_map_from_bat()
@@ -43,6 +49,7 @@ class Window(pyglet.window.Window):
                 self.player.calculate_collide(obj)
         self.do_friction(self.player)
         self.player.handle(dt)
+        self.selected_item = self.hotbar.get_selected_item()
 
     def on_key_press(self, sym, mod):
         if sym == key.ESCAPE:
@@ -73,6 +80,8 @@ class Window(pyglet.window.Window):
             self.player.draw()
         self.fps_display.draw()
         self.hotbar.draw()
+        if self.selected_item is not None:
+            self.selected_item.draw()
 
 
 if __name__ == '__main__':
