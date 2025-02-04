@@ -12,8 +12,7 @@ class Window(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         resize_and_center_image(BACKGROUND_IMAGE, self.width, self.height)
-        self.hotbar = HotBar(50, self.height - 50, 64, 64, slots_amount=9)
-        self.hotbar.update_selected(3)
+        self.hotbar = HotBar(50, self.height - 50, 64, 64, slots_amount=9, selected_slot=1)
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
         self.player = Player(player_animation, self.width // 2, self.height // 2, 64, 64, PLAYER_SPEED, batch=None)
@@ -48,6 +47,8 @@ class Window(pyglet.window.Window):
     def on_key_press(self, sym, mod):
         if sym == key.ESCAPE:
             self.close()
+        if sym in KEY_NUMBERS:
+            self.hotbar.update_selected(KEY_NUMBERS[sym])
 
     def on_mouse_press(self, x, y, but, mod):
         pass
