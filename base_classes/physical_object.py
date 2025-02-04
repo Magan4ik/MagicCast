@@ -8,7 +8,7 @@ from settings.settings import *
 
 class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
     def __init__(self, img: pyglet.image.AbstractImage | pyglet.image.Animation,
-                 x: float, y: float, width: int, height: int, batch: Optional[pyglet.graphics.Batch],
+                 x: float, y: float, batch: Optional[pyglet.graphics.Batch],
                  mass: float = DEFAULT_MASS, elastic: float = 0, friction_mu: float = DEFAULT_FRICTION_MU,
                  *args, **kwargs):
         super().__init__(img, x, y, batch=batch, *args, **kwargs)

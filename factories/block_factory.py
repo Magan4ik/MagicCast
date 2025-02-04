@@ -12,8 +12,6 @@ class BlockFactory:
             img,
             block_data["x"],
             block_data["y"],
-            MAP_CELL_SIZE,
-            MAP_CELL_SIZE,
             ALL_OBJECTS,
             mass=block_data.get("mass", 5),
             elastic=block_data.get("elastic", 0.3),
