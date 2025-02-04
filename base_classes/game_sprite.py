@@ -7,9 +7,9 @@ from settings.settings import *
 
 class GameSprite(PhysObject):
     def __init__(self, img,
-                 x: float, y: float, width: int, height: int, batch: Optional[pyglet.graphics.Batch],
+                 x: float, y: float, batch: Optional[pyglet.graphics.Batch],
                  mass: float = DEFAULT_MASS, elastic: float = 0, *args, **kwargs):
-        super().__init__(img, x, y, width, height, batch=batch, mass=mass, elastic=elastic, *args, **kwargs)
+        super().__init__(img, x, y, batch=batch, mass=mass, elastic=elastic, *args, **kwargs)
         self.background = False
 
     def _make_animation(self, img_list: list[pyglet.image.AbstractImage], width: int, height: int):
