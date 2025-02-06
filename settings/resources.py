@@ -76,3 +76,10 @@ spell_icons = [
 ]
 for spell in spell_icons:
     resize_and_center_image(spell, 32, 32)
+
+spell_images = {
+    "fireball": pyglet.image.load("textures/spells/fireball.png"),
+}
+for spell in spell_images.values():
+    resize_and_center_image(spell, 32, 32)
+

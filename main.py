@@ -9,6 +9,11 @@ from ui.hot_bar import HotBar
 from ui.item import Item
 from ui.storage import Storage
 
+from magic.base_components import BaseSpell
+from magic.cast_components import PointCast
+from magic.delivery_components import InstantDelivery, ProjectileDelivery
+from magic.effect_components import InstanceTimeRule, Teleport, PeriodTimeRule
+
 
 class Window(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
@@ -22,10 +27,14 @@ class Window(pyglet.window.Window):
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
         self.player = Player(player_animation, self.width // 2, self.height // 2, PLAYER_SPEED, batch=None)
-        self.player.update_forces(gravity=Vec2(0, -10000))
         self.map_manager = MapManager(self.player)
         self.map_manager.load_map_from_bat()
         self.camera = TargetCamera(self, self.player, scroll_speed=1, min_zoom=1, max_zoom=4)
+        cast_comp = PointCast("", self.player)
+        deliver = InstantDelivery("", self.player)
+        # deliver = ProjectileDelivery("", self.player)
+        effect = PeriodTimeRule("", self.player, Teleport(), 1, 1)
+        self.spell = BaseSpell("teleport", self.player, cast_comp, deliver, [effect], 500)
 
     def air_resistance_force(self, width, height, velocity: pyglet.math.Vec2):
         area = width if abs(velocity.x) > abs(velocity.y) else height
@@ -44,6 +53,7 @@ class Window(pyglet.window.Window):
         obj.update_forces(air_friction=friction)
 
     def update(self, dt):
+        self.player.update_forces(gravity=Vec2(0, -10000))
         for chunk in self.map_manager.get_closes_chunks():
             for obj in chunk.sprites:
                 self.player.calculate_collide(obj)
@@ -58,7 +68,11 @@ class Window(pyglet.window.Window):
             self.hotbar.update_selected(KEY_NUMBERS[sym])
 
     def on_mouse_press(self, x, y, but, mod):
-        pass
+        x, y = self.camera.normalize_mouse_pos(x, y)
+        objects = []
+        for chunk in self.map_manager.get_visible_chunks():
+            objects += chunk.sprites
+        self.spell.cast((x, y), objects)
 
     def on_mouse_release(self, x, y, but, mod):
         pass
@@ -78,6 +92,7 @@ class Window(pyglet.window.Window):
         with self.camera:
             self.map_manager.render()
             self.player.draw()
+            ALL_OBJECTS.draw()
         self.fps_display.draw()
         self.hotbar.draw()
         if self.selected_item is not None:

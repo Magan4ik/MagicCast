@@ -33,3 +33,4 @@ class Player(GameSprite):
         acceleration = self.calculate_acceleration()
         self.update_velocity(acceleration, dt)
         self.update_position(dt)
+        self.spell_channeling()
