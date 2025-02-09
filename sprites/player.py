@@ -1,16 +1,17 @@
 from typing import Optional
 
+from base_classes.entity import Entity
 from settings.settings import *
 from base_classes.game_sprite import GameSprite
 from pyglet.math import Vec2
 
 
-class Player(GameSprite):
-    def __init__(self, img: list[pyglet.image.AbstractImage],
-                 x: float, y: float, speed: int,
-                 batch: Optional[pyglet.graphics.Batch]):
-        super().__init__(img, x, y, batch, mass=PLAYER_MASS, elastic=PLAYER_ELASTIC)
-        self.speed = speed
+class Player(Entity):
+    def __init__(self, img,
+                 x: float, y: float, batch: Optional[pyglet.graphics.Batch],
+                 speed: int, hp: int = 100,
+                 mass: float = DEFAULT_MASS, elastic: float = 0, *args, **kwargs):
+        super().__init__(img, x, y, batch, speed, hp, mass=PLAYER_MASS, elastic=PLAYER_ELASTIC)
 
     def control(self, dt):
         if KEYBOARD[key.D]:
@@ -27,10 +28,3 @@ class Player(GameSprite):
 
         if KEYBOARD[key.SPACE]:
             self.velocity = Vec2(self.velocity.x, PLAYER_JUMP_POWER)
-
-    def handle(self, dt):
-        self.control(dt)
-        acceleration = self.calculate_acceleration()
-        self.update_velocity(acceleration, dt)
-        self.update_position(dt)
-        self.spell_channeling()

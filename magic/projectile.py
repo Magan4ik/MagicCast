@@ -20,7 +20,6 @@ class Projectile(pyglet.sprite.Sprite):
         self.deliver = deliver
 
     def channeling(self):
-        self.target.update_pos()
         direction = (Vec2(self.target.x, self.target.y) - Vec2(self.x, self.y)).normalize()
         self.velocity = direction * self.velocity.length()
         self.x += self.velocity.x

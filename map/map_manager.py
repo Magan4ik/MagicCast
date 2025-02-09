@@ -1,6 +1,9 @@
 import pickle
 
+from pyglet.math import Vec2
+
 from base_classes.coordinate_object import CoordinateObject
+from base_classes.entity import Entity
 from base_classes.game_sprite import GameSprite
 from factories.block_factory import BlockFactory
 from map.chunk import Chunk
@@ -41,8 +44,8 @@ class MapManager:
             if key in self.chunks:
                 yield self.chunks[key]
 
-    def get_closes_chunks(self):
-        x = (self.target.x // MAP_CELL_SIZE) * MAP_CELL_SIZE
+    def get_closes_chunks(self, x):
+        x = (x // MAP_CELL_SIZE) * MAP_CELL_SIZE
         x_left = int(x - CHUNK_COLLIDE_RANGE * MAP_CELL_SIZE * CHUNK_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
         x_right = int(x + CHUNK_COLLIDE_RANGE * MAP_CELL_SIZE * CHUNK_SIZE) // (CHUNK_SIZE * MAP_CELL_SIZE)
         for key in range(x_left, x_right + 1):
@@ -63,6 +66,29 @@ class MapManager:
                 chunk_index = tile["x"] // (CHUNK_SIZE * MAP_CELL_SIZE)
                 if chunk_index in self.chunks:
                     self.chunks[chunk_index].add_sprite(sprite)
+
+    def add_entity(self, entity: Entity):
+        x = (entity.x // MAP_CELL_SIZE) * MAP_CELL_SIZE
+        chunk_index = x // (CHUNK_SIZE * MAP_CELL_SIZE)
+        self.chunks[chunk_index].add_entity(entity)
+
+    def update_entities(self, dt):
+        for chunk in self.get_visible_chunks():
+            for entity in chunk.entities:
+                entity.update_forces(gravity=Vec2(0, -10000))
+                entity.do_air_friction()
+                for closes_chunk in self.get_closes_chunks(entity.x):
+                    for obj in closes_chunk.sprites:
+                        entity.calculate_collide(obj)
+                entity.handle(dt)
+                x = (entity.x // MAP_CELL_SIZE) * MAP_CELL_SIZE
+                chunk_index = x // (CHUNK_SIZE * MAP_CELL_SIZE)
+                try:
+                    if self.chunks[chunk_index] != chunk:
+                        chunk.remove_entity(entity)
+                        self.chunks[chunk_index].add_entity(entity)
+                except KeyError:
+                    print("Out of a chunk")
 
     def render(self):
         for chunk in self.get_visible_chunks():
