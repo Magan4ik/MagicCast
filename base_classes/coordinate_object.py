@@ -22,6 +22,9 @@ class CoordinateObject:
             )
         raise TypeError("Can't check collision with non-CoordinateObject object")
 
+    def collide_point(self, point: tuple[int, int]):
+        return self.left <= point[0] <= self.right and self.bottom <= point[1] <= self.top
+
     @property
     def top(self) -> float:
         return self.y + self.height // 2

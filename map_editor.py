@@ -19,9 +19,9 @@ class MapEditor(pyglet.window.Window):
         self.inventory_batch = pyglet.graphics.Batch()
         self.block_rotation = 0
         self.block_inventory = [
-            MapTile("grass", 35, self.height - 35, self.inventory_batch, 1.2),
+            MapTile("grass", 35, self.height - 35, self.inventory_batch, 1.8),
             MapTile("black", 95, self.height - 35, self.inventory_batch, 0.2),
-            MapTile("brick", 155, self.height - 35, self.inventory_batch, 0.5),
+            MapTile("brick", 155, self.height - 35, self.inventory_batch, 1.5),
         ]
         self.tiles: list[MapTile] = []
         self.dx = 0

@@ -83,3 +83,18 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
                 self.remove_force(f"normal_reaction_{id(other)}")
                 self.remove_force(f"friction_{id(other)}")
 
+    def air_resistance_force(self, width, height, velocity: pyglet.math.Vec2):
+        area = width if abs(velocity.x) > abs(velocity.y) else height
+        if velocity.length() == 0: return Vec2(0, 0)
+        force_direction = velocity * (-1 / velocity.length())
+        force = force_direction * 0.5 * 0.01 * 0.1 * area * velocity.length() ** 2
+        if 0 < abs(force.x) < 1e-5:
+            force = Vec2(0, force.y)
+        if 0 < abs(force.y) < 1e-5:
+            force = Vec2(force.y, 0)
+
+        return force
+
+    def do_air_friction(self):
+        friction = self.air_resistance_force(self.width, self.height, self.velocity)
+        self.update_forces(air_friction=friction)
