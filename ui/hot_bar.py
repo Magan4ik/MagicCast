@@ -1,11 +1,18 @@
+from typing import Dict, List, Optional
+
 import pyglet.graphics
 
+from map.map_manager import MapManager
 from settings.settings import *
+from sprites.player import Player
 from ui.item import Item
 
 
 class HotBar:
-    def __init__(self, x: float, y: float, width: int, height: int, slots_amount: int = 5, selected_slot: int = 0):
+
+    def __init__(self, x: float, y: float, width: int, height: int, owner: Player,
+                 slots_amount: int = 5, selected_slot: int = 0):
+        self.owner = owner
         self.width = width
         self.height = height
         self.start_image = ui_images["hotbar_start"]
@@ -29,7 +36,7 @@ class HotBar:
                                      group=self.background_group)
                 for i in range(1, slots_amount + 1)],
             "items": [None for _ in range(slots_amount)]
-            }
+        }
 
         self.slots_amount = slots_amount
         self.selected_slot = selected_slot
@@ -51,15 +58,29 @@ class HotBar:
         if item is not None:
             item.selected = True
 
-    def set_item(self, item: Item, position: int):
+    def set_item(self, item: Item, position: Optional[int] = None):
+        if position is None:
+            for i, it in enumerate(self.sprites["items"], 1):
+                if it is None:
+                    position = i
+                    break
         slot = self.sprites["slots"][position - 1]
         self.sprites["items"][position - 1] = item
         item.x = slot.x
         item.y = slot.y
         item.batch = self.batch
         item.group = self.item_group
+        item.owner = self.owner
 
-    def get_selected_item(self):
+    def throw_item(self, map_manager: MapManager):
+        item = self.get_selected_item()
+        if item:
+            index = self.sprites["items"].index(item)
+            self.sprites["items"][index] = None
+            item.throw()
+            map_manager.add_entity(item)
+
+    def get_selected_item(self) -> Optional[Item]:
         return self.sprites["items"][self.selected_slot]
 
     def draw(self):

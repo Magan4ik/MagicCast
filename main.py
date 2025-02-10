@@ -1,3 +1,5 @@
+import math
+
 from pyglet.math import Vec2
 
 from magic.spells import *
@@ -18,22 +20,25 @@ class Window(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         resize_and_center_image(BACKGROUND_IMAGE, self.width, self.height)
-        self.hotbar = HotBar(50, self.height - 50, 64, 64, slots_amount=9, selected_slot=1)
-        self.healthbar = HealthBar(ui_images["player_health_bar"],
-                                   self.width - ui_images["player_health_bar"].get_texture().width // 2 - 50,
-                                   self.height - 50, max_hp=100, batch=None)
-        wood_staff_storage = Staff("wood_staff", item_images["staffs"]["wood_staff"],
-                                   storage_images["staffs"]["wood_staff"], None, (50, 500), (150, 400))
-        wood_staff_storage.set_item(SpellItem(spell_icons[0], fireball, batch=None), 1)
-        wood_staff_storage.set_item(SpellItem(spell_icons[0], heal_hand, batch=None), 0)
-        self.hotbar.set_item(wood_staff_storage, 2)
-        self.selected_item = None
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
 
         self.player = Player(player_animation, self.width // 2, self.height // 2, None, PLAYER_SPEED, 100)
         self.enemy = Enemy(enemy_animation, self.width // 2 + 200, self.height // 2, ALL_OBJECTS, PLAYER_SPEED, 100)
         self.enemy2 = Enemy(enemy_animation, self.width // 2 + 400, self.height // 2, ALL_OBJECTS, PLAYER_SPEED, 100)
+
+        self.hotbar = HotBar(50, self.height - 50, 64, 64, self.player, slots_amount=9, selected_slot=1)
+        self.healthbar = HealthBar(ui_images["player_health_bar"],
+                                   self.width - ui_images["player_health_bar"].get_texture().width // 2 - 50,
+                                   self.height - 50, max_hp=100, batch=None)
+
+        wood_staff_storage = Staff("wood_staff", item_images["staffs"]["wood_staff"],
+                                   storage_images["staffs"]["wood_staff"], None, (50, 500), (150, 400))
+        wood_staff_storage.set_item(SpellItem(spell_icons[0], fireball, batch=None), 1)
+        wood_staff_storage.set_item(SpellItem(spell_icons[0], heal_hand, batch=None), 0)
+        self.hotbar.set_item(wood_staff_storage, 2)
+        self.selected_item = None
+
         self.map_manager = MapManager(self.player)
         self.map_manager.load_map_from_bat()
         self.map_manager.add_entity(self.enemy)
@@ -46,6 +51,13 @@ class Window(pyglet.window.Window):
         self.selected_item = self.hotbar.get_selected_item()
         self.map_manager.update_entities(dt)
         self.healthbar.hp = self.player.hp
+        for chunk in self.map_manager.get_closes_chunks(self.player.x):
+            for entity in chunk.entities:
+                if isinstance(entity, Item):
+                    if math.sqrt((self.player.x - entity.x)**2 + (self.player.y - entity.y)**2) <= 100:
+                        if entity.check_pickup(self.player):
+                            chunk.remove_entity(entity)
+                            self.hotbar.set_item(entity)
 
     def on_key_press(self, sym, mod):
         if sym == key.ESCAPE:
@@ -56,8 +68,8 @@ class Window(pyglet.window.Window):
             selected_item = self.hotbar.get_selected_item()
             if isinstance(selected_item, Staff):
                 selected_item.update_selected(SPELL_KEYS[sym])
-                item = selected_item.get_selected_item()
-                print(item.name)
+        if sym == key.Q:
+            self.hotbar.throw_item(self.map_manager)
 
     def on_mouse_press(self, x, y, but, mod):
         x, y = self.camera.normalize_mouse_pos(x, y)
