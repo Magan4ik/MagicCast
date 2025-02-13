@@ -17,6 +17,7 @@ class Item(Entity):
         self.start_pickup_time = {}
 
     def throw(self):
+        self.forces = {}
         self.x = self.owner.x
         self.y = self.owner.y
         self.velocity = Vec2((200 * self.owner.scale_x) + self.owner.velocity.x, 100 + self.owner.velocity.y)
