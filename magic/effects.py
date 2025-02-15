@@ -10,8 +10,8 @@ class FixedDamage(Effect):
         if self.targets is None:
             self.targets = area.targets
         for target in self.targets:
-            if hasattr(target, "hp"):
-                target.hp -= self.damage
+            if hasattr(target, "take_damage"):
+                target.take_damage(self.damage)
 
 
 class Teleport(Effect):

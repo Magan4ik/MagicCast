@@ -5,6 +5,8 @@ import pyglet.sprite
 from settings.settings import *
 
 from base_classes.game_sprite import GameSprite
+from ui.damage_numbers import DamageNumber
+from random import randint
 
 
 class HealthBar(pyglet.shapes.Rectangle):
@@ -39,9 +41,23 @@ class Entity(GameSprite):
         self.max_hp = hp
         self._hp = hp
         self.speed = speed
+        self.damage_numbers = []
+
+    def take_damage(self, damage: float):
+        self.hp -= damage
+        self.damage_numbers.append(
+            DamageNumber(randint(int(self.x - self.width//4), int(self.x + self.width//4)),
+                         randint(int(self.y + self.width//4), int(self.y + self.width)), damage, batch=ALL_OBJECTS, lifespan=1)
+        )
 
     def control(self, dt):
         pass
+
+    def update_damage_numbers(self, dt):
+        for dn in self.damage_numbers:
+            dn.update(dt)
+            if dn.is_finished:
+                self.damage_numbers.remove(dn)
 
     def handle(self, dt):
         self.control(dt)
@@ -49,6 +65,7 @@ class Entity(GameSprite):
         self.update_velocity(acceleration, dt)
         self.update_position(dt)
         self.spell_channeling()
+        self.update_damage_numbers(dt)
 
     @property
     def hp(self):
