@@ -48,8 +48,8 @@ class ParticleGroup:
             self.positions = np.array([(pos_x, pos_y) for _ in range(self.num)], dtype="f4")
         else:
             self.positions = np.column_stack(
-                (np.random.uniform(pos_x - chaos_width/win.width, pos_x + chaos_width/win.width, self.num),
-                 np.random.uniform(pos_y - chaos_height/win.height, pos_y + chaos_height/win.height, self.num))
+                (np.random.uniform(pos_x - chaos_width / win.width, pos_x + chaos_width / win.width, self.num),
+                 np.random.uniform(pos_y - chaos_height / win.height, pos_y + chaos_height / win.height, self.num))
             ).astype("f4")
         aspect_ratio = win.width / win.height
         if angle is None:
@@ -128,18 +128,18 @@ class ParticleManager:
         ParticleManager.reset_gl()
 
 
-particle1 = ParticleGroup(program, 300, 200, 100, 1,
+explosion = ParticleGroup(program, 300, 200, 100, 1,
                           velocity_x_range=(0.2, 1),
                           velocity_y_range=(0.08, 0.8), rebound=False, color_mod=(1., 0.2, 0.2))
-particle2 = ParticleGroup(program, 1000, 300, 75, 1, angle=np.pi / 2, chaos=True, color_mod=(0., 1., 0.5),
-                          num_particles=25, chaos_width=25, chaos_height=75, brightness=0.03)
+heal = ParticleGroup(program, 1000, 300, 75, 1, angle=np.pi / 2, chaos=True, color_mod=(0., 1., 0.5),
+                     num_particles=25, chaos_width=25, chaos_height=75, brightness=0.03)
 
-particle3 = ParticleGroup(program, 100, 400, 75, 10, chaos=True, rebound=True, color_mod=(0.8, 0.3, 0.8),
-                          velocity_x_range=(0.02, 0.2),
-                          velocity_y_range=(0.01, 0.1), num_particles=200, brightness=0.02,
-                          chaos_width=75, chaos_height=75)
+mystery = ParticleGroup(program, 100, 400, 75, 10, chaos=True, rebound=True, color_mod=(0.8, 0.3, 0.8),
+                        velocity_x_range=(0.02, 0.2),
+                        velocity_y_range=(0.01, 0.1), num_particles=200, brightness=0.03,
+                        chaos_width=75, chaos_height=75)
 
-particles = ParticleManager(particle1, particle2, particle3)
+particles = ParticleManager(explosion, heal, mystery)
 
 
 def update(dt):
@@ -149,7 +149,8 @@ def update(dt):
 
 @win.event
 def on_draw():
-    win.clear()
+    gl.glClearColor(0.0, 0.0, 0.0, 1.0)
+    gl.glClear(gl.GL_COLOR_BUFFER_BIT)
     particles.draw()
 
 

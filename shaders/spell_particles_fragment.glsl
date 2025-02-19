@@ -15,7 +15,8 @@ void main() {
 
     float fade = 1. - min(1., iTime/life_time);
     float d = distance(center.xy, uv.xy);
-    vec3 clr = color_mod * brightness/d;
+    vec3 clr = color_mod;
+    fade *= brightness/d;
 
     color = vec4(clr, fade);
 }
