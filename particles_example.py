@@ -24,10 +24,11 @@ class ParticleGroup:
                  velocity_x_range: tuple[float, float] = (0.02, 1),
                  velocity_y_range: tuple[float, float] = (0.02, 1),
                  angle: Optional[float] = None,
+                 rebound: bool = False,
+                 loop: bool = False,
                  chaos: bool = False,
                  chaos_width: int = 50,
                  chaos_height: int = 50,
-                 rebound: bool = False,
                  color_mod: tuple[float, float, float] = (1., 0., 0.),
                  brightness: float = 0.1):
         self.prog = program
@@ -38,6 +39,7 @@ class ParticleGroup:
         self.is_finished = False
         self.num = num_particles
         self.rebound = rebound
+        self.loop = loop
         self.color_mod = color_mod
         self.brightness = brightness
 
@@ -45,7 +47,7 @@ class ParticleGroup:
         pos_y = y / win.height * 2 - 1
         self.center = (pos_x, pos_y)
         if not chaos:
-            self.positions = np.array([(pos_x, pos_y) for _ in range(self.num)], dtype="f4")
+            self.positions = np.full((self.num, 2), (pos_x, pos_y), dtype="f4")
         else:
             self.positions = np.column_stack(
                 (np.random.uniform(pos_x - chaos_width / win.width, pos_x + chaos_width / win.width, self.num),
@@ -55,12 +57,12 @@ class ParticleGroup:
         if angle is None:
             angles = np.random.uniform(0, 2 * np.pi, self.num)
         else:
-            print(angle)
             angles = np.ones(self.num) * angle
         speeds_x = np.random.uniform(velocity_x_range[0], velocity_x_range[1], self.num)
         speeds_y = np.random.uniform(velocity_y_range[0], velocity_y_range[1], self.num)
         self.velocities = np.column_stack((np.cos(angles) * speeds_x / aspect_ratio, np.sin(angles) * speeds_y)).astype(
             "f4")
+
         self.vbo = ctx.buffer(self.positions)
         self.vao = ctx.simple_vertex_array(self.prog, self.vbo, "in_position")
 
@@ -76,6 +78,8 @@ class ParticleGroup:
             out_of_bounds = distances > self.radius
             if self.rebound:
                 self.velocities[out_of_bounds] *= -1
+            elif self.loop:
+                self.positions[out_of_bounds] = self.center + (self.positions[out_of_bounds] - self.center) * -1
             else:
                 self.velocities[out_of_bounds] *= 0
                 self.positions[out_of_bounds] *= 100
@@ -139,7 +143,14 @@ mystery = ParticleGroup(program, 100, 400, 75, 10, chaos=True, rebound=True, col
                         velocity_y_range=(0.01, 0.1), num_particles=200, brightness=0.03,
                         chaos_width=75, chaos_height=75)
 
-particles = ParticleManager(explosion, heal, mystery)
+wind = ParticleGroup(program, 700, 200, 75, 20, num_particles=80, chaos=True, chaos_width=150, chaos_height=140,
+                     angle=0.,
+                     color_mod=(0.8, 0.8, 0.8), brightness=0.5,
+                     velocity_x_range=(0.08, 0.2),
+                     velocity_y_range=(0.08, 0.2),
+                     loop=True)
+
+particles = ParticleManager(explosion, heal, mystery, wind)
 
 
 def update(dt):
