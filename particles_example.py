@@ -7,6 +7,8 @@ from pyglet import app, gl, clock, window
 import time
 import random
 
+from pyglet.window import key
+
 win = window.Window(width=1500, height=800)
 ctx = moderngl.create_context()
 
@@ -68,11 +70,19 @@ class ParticleGroup:
         self.vbo = ctx.buffer(self.positions)
         self.vao = ctx.simple_vertex_array(self.prog, self.vbo, "in_position")
 
+    def move(self, dx: float, dy: float):
+        dx = dx/win.width
+        dy = dy/win.height
+        self.center = self.center[0] + dx, self.center[1] + dy
+        self.positions += (dx, dy)
+        self.vbo.write(self.positions)
+
     def update(self, dt):
         self.time_delta = time.time() - self.start_time
         if self.time_delta >= self.life_time:
             self.is_finished = True
             self.vbo.release()
+            self.vao.release()
 
         if not self.is_finished:
             self.positions += self.velocities * dt
@@ -106,6 +116,10 @@ class ParticleManager:
 
     def remove(self, particle_group: ParticleGroup):
         self.particle_groups.remove(particle_group)
+
+    def move(self, dx: float, dy: float):
+        for group in self.particle_groups:
+            group.move(dx, dy)
 
     @staticmethod
     def init_gl():
@@ -162,6 +176,18 @@ particles = ParticleManager(explosion, heal, mystery, wind, x_particle)
 def update(dt):
     particles.update(dt)
     pass
+
+
+@win.event
+def on_key_press(sym, mod):
+    if sym == key.D:
+        particles.move(50, 0)
+    if sym == key.A:
+        particles.move(-50, 0)
+    if sym == key.W:
+        particles.move(0, 50)
+    if sym == key.S:
+        particles.move(0, -50)
 
 
 @win.event
