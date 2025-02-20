@@ -23,7 +23,7 @@ class ParticleGroup:
                  life_time: float, num_particles: int = 100,
                  velocity_x_range: tuple[float, float] = (0.02, 1),
                  velocity_y_range: tuple[float, float] = (0.02, 1),
-                 angle: Optional[float] = None,
+                 angles: Optional[list[float]] = None,
                  rebound: bool = False,
                  loop: bool = False,
                  chaos: bool = False,
@@ -54,13 +54,15 @@ class ParticleGroup:
                  np.random.uniform(pos_y - chaos_height / win.height, pos_y + chaos_height / win.height, self.num))
             ).astype("f4")
         aspect_ratio = win.width / win.height
-        if angle is None:
-            angles = np.random.uniform(0, 2 * np.pi, self.num)
+        if angles is None:
+            full_angles = np.random.uniform(0, 2 * np.pi, self.num)
         else:
-            angles = np.ones(self.num) * angle
+            amount = np.ceil(self.num / len(angles))
+            full_angles = np.tile(angles, int(amount))
+            full_angles = np.resize(full_angles, self.num)
         speeds_x = np.random.uniform(velocity_x_range[0], velocity_x_range[1], self.num)
         speeds_y = np.random.uniform(velocity_y_range[0], velocity_y_range[1], self.num)
-        self.velocities = np.column_stack((np.cos(angles) * speeds_x / aspect_ratio, np.sin(angles) * speeds_y)).astype(
+        self.velocities = np.column_stack((np.cos(full_angles) * speeds_x / aspect_ratio, np.sin(full_angles) * speeds_y)).astype(
             "f4")
 
         self.vbo = ctx.buffer(self.positions)
@@ -135,7 +137,7 @@ class ParticleManager:
 explosion = ParticleGroup(program, 300, 200, 100, 1,
                           velocity_x_range=(0.2, 1),
                           velocity_y_range=(0.08, 0.8), rebound=False, color_mod=(1., 0.2, 0.2))
-heal = ParticleGroup(program, 1000, 300, 75, 1, angle=np.pi / 2, chaos=True, color_mod=(0., 1., 0.5),
+heal = ParticleGroup(program, 1000, 300, 75, 1, angles=[np.pi / 2], chaos=True, color_mod=(0., 1., 0.5),
                      num_particles=25, chaos_width=25, chaos_height=75, brightness=0.03)
 
 mystery = ParticleGroup(program, 100, 400, 75, 10, chaos=True, rebound=True, color_mod=(0.8, 0.3, 0.8),
@@ -144,13 +146,17 @@ mystery = ParticleGroup(program, 100, 400, 75, 10, chaos=True, rebound=True, col
                         chaos_width=75, chaos_height=75)
 
 wind = ParticleGroup(program, 700, 200, 75, 20, num_particles=80, chaos=True, chaos_width=150, chaos_height=140,
-                     angle=0.,
+                     angles=[0.],
                      color_mod=(0.8, 0.8, 0.8), brightness=0.5,
                      velocity_x_range=(0.08, 0.2),
                      velocity_y_range=(0.08, 0.2),
                      loop=True)
 
-particles = ParticleManager(explosion, heal, mystery, wind)
+x_particle = ParticleGroup(program, 700, 600, 50, 30, num_particles=75, rebound=True, angles=[np.pi/4, 3*np.pi/4],
+                           velocity_x_range=(0.1, 0.2),
+                           velocity_y_range=(0.1, 0.2))
+
+particles = ParticleManager(explosion, heal, mystery, wind, x_particle)
 
 
 def update(dt):
