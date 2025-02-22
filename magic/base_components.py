@@ -29,14 +29,31 @@ class Area:
         for chunk in chunks:
             possible_targets = chunk.sprites + chunk.entities
             for t in possible_targets:
-                if math.sqrt((self.x - t.x) ** 2 + (self.y - t.y) ** 2) <= self.radius:
-                    targets.append(t)
+                if self.radius > 0:
+                    if math.sqrt((self.x - t.x) ** 2 + (self.y - t.y) ** 2) <= self.radius:
+                        targets.append(t)
+                else:
+                    if t.collide_point((self.x, self.y)):
+                        targets.append(t)
         self.targets = targets
 
 
 class MagicComponent(ABC):
     def __init__(self):
         self.caster: Optional[GameSprite] = None
+        self.particle_group_config = {
+            "x": -500, "y": -500, "radius": 0,
+            "life_time": 0, "num_particles": 100,
+            "velocity_x_range": (0.02, 1), "velocity_y_range": (0.02, 1),
+            "angles": None,
+            "rebound": False, "loop": False, "chaos": False,
+            "chaos_width": 50, "chaos_height": 50,
+            "color_mod": (1., 0., 0.),
+            "brightness": 0.1
+        }
+
+    def get_particle_config(self) -> dict:
+        return self.particle_group_config
 
 
 class CastComponent(MagicComponent, ABC):
@@ -49,16 +66,21 @@ class CastComponent(MagicComponent, ABC):
         pass
 
 
-class Effect(ABC):
+class Effect(MagicComponent, ABC):
     def __init__(self):
+        super().__init__()
         self.targets = None
-        self.caster = None
+        self.area: Optional[Area] = None
 
     def set_caster(self, caster: GameSprite):
         self.caster = caster
 
     @abstractmethod
-    def apply_effect(self, area: Area):
+    def apply_effect(self, target):
+        pass
+
+    @abstractmethod
+    def copy(self):
         pass
 
 
@@ -66,6 +88,7 @@ class EffectComponent(MagicComponent, ABC):
     def __init__(self, type_effect: Effect):
         super().__init__()
         self.type_effect = type_effect
+        self.particle_group = None
         self.is_finished = False
         self.started = False
 
@@ -74,7 +97,19 @@ class EffectComponent(MagicComponent, ABC):
         pass
 
     @abstractmethod
-    def update(self, area: Area):
+    def update(self, target):
+        pass
+
+    def handle(self, targets):
+        if len(targets) > 0:
+            for target in targets:
+                target.effects.append(self.copy())
+        # TODO: fix teleport handle
+        # else:
+        #     self.caster.effects.append(self.copy())
+
+    @abstractmethod
+    def copy(self):
         pass
 
 
@@ -118,17 +153,14 @@ class BaseSpell(ABC):
             self.delivery_component.channeling()
         else:
             if self.area.targets is None:
+                particle_config = self.delivery_component.get_particle_config()
+                self.map_manager.particle_factory.create_group(**particle_config)
                 chunks = self.map_manager.get_closes_chunks(self.area.x)
                 self.area.set_closes_targets(chunks)
             for effect in self.effect_components:
-                if not effect.started:
-                    effect.start()
-                if not effect.is_finished:
-                    effect.update(self.area)
-                else:
-                    self.finished_effects.add(effect)
-            if len(self.effect_components) == len(self.finished_effects):
-                self.reset()
+                effect.type_effect.area = self.area
+                effect.handle(self.area.targets)
+            self.reset()
 
     def cast(self, mouse_pos: tuple[int, int], caster: GameSprite, map_manager: MapManager):
         if self.casting: return

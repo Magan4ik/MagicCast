@@ -6,14 +6,17 @@ from base_classes.coordinate_object import CoordinateObject
 from base_classes.entity import Entity
 from base_classes.game_sprite import GameSprite
 from factories.block_factory import BlockFactory
+from factories.particle_factory import ParticleGroupFactory
 from map.chunk import Chunk
+from particles.particle_manager import ParticleManager
 from settings.settings import *
 
 
 class MapManager:
-    def __init__(self, target: CoordinateObject):
+    def __init__(self, target: CoordinateObject, particle_factory: ParticleGroupFactory):
         self.target = target
         self.chunks: dict[int, Chunk] = {}
+        self.particle_factory = particle_factory
         self.chunks_amount = None
         self.chunks_min = None
 
@@ -80,7 +83,14 @@ class MapManager:
                 for closes_chunk in self.get_closes_chunks(entity.x):
                     for obj in closes_chunk.sprites:
                         entity.calculate_collide(obj)
+
                 entity.handle(dt)
+                for effect in entity.effects:
+                    if effect.particle_group is None:
+                        particle_config = effect.get_particle_config()
+                        particle_group = self.particle_factory.create_group(**particle_config)
+                        effect.particle_group = particle_group
+
                 x = (entity.x // MAP_CELL_SIZE) * MAP_CELL_SIZE
                 chunk_index = x // (CHUNK_SIZE * MAP_CELL_SIZE)
                 try:
@@ -89,6 +99,10 @@ class MapManager:
                         self.chunks[chunk_index].add_entity(entity)
                 except KeyError:
                     print("Out of a chunk")
+
+    def update_particles(self, dx, dy, dt):
+        self.particle_factory.manager.move(dx, dy)
+        self.particle_factory.manager.update(dt)
 
     def render(self):
         for chunk in self.get_visible_chunks():

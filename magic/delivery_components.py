@@ -8,12 +8,24 @@ class ProjectileDelivery(DeliveryComponent):
         super().__init__()
         self.speed = speed
         self.color = color
+        self.particle_group_config["color_mod"] = self.color[0] / 255, self.color[1] / 255, self.color[2] / 255
+        self.particle_group_config["life_time"] = 1
+        self.particle_group_config["velocity_x_range"] = (0.2, 1)
+        self.particle_group_config["velocity_x_range"] = (0.08, 0.8)
 
     def deliver(self, area: Area):
         projectile = Projectile(spell_images["fireball"], self.caster.x, self.caster.y,
                                 batch=ALL_OBJECTS, target=area, speed=self.speed, caster=self.caster, deliver=self)
         projectile.color = self.color
         self.channeling_object = projectile
+
+    def get_particle_config(self) -> dict:
+        if self.channeling_object is None: return super().get_particle_config()
+        area = self.channeling_object.target
+        self.particle_group_config["x"] = area.x
+        self.particle_group_config["y"] = area.y
+        self.particle_group_config["radius"] = area.radius
+        return super().get_particle_config()
 
 
 class InstantDelivery(DeliveryComponent):

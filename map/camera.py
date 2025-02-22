@@ -97,11 +97,15 @@ class TargetCamera(Camera):
         view_matrix = view_matrix.translate((x * self._zoom, y * self._zoom, 0))
         self._window.view = view_matrix
 
-    def normalize_mouse_pos(self, x, y) -> tuple[float, float]:
+    def get_camera_delta(self):
         dx = self._window.width // 2 - self.target.x
         dy = 0
         if self.target.y >= self._window.height // 2:
             dy = self._window.height // 2 - self.target.y
+        return dx, dy
+
+    def normalize_mouse_pos(self, x, y) -> tuple[float, float]:
+        dx, dy = self.get_camera_delta()
         x = x - dx
         y = y - dy
         return x, y

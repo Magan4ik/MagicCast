@@ -30,7 +30,6 @@ class Projectile(pyglet.sprite.Sprite):
             self.kill()
 
     def kill(self):
-        self.deliver.channeling_object = None
         self.deliver.is_finished = True
         self.batch = None
         self.delete()

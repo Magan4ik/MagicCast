@@ -2,6 +2,7 @@ import math
 
 from pyglet.math import Vec2
 
+from factories.particle_factory import ParticleGroupFactory
 from magic.spells import *
 from map.camera import TargetCamera
 from map.map_manager import MapManager
@@ -15,6 +16,8 @@ from ui.hot_bar import HotBar
 from ui.item import Item, SpellItem
 from ui.storage import Storage, Staff
 
+from particles import shader_setup
+
 
 class Window(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
@@ -22,6 +25,9 @@ class Window(pyglet.window.Window):
         resize_and_center_image(BACKGROUND_IMAGE, self.width, self.height)
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
+
+        shader_config = shader_setup.setup(self.width, self.height)
+        self.particle_factory = ParticleGroupFactory(shader_config)
 
         self.player = Player(player_animation, self.width // 2, self.height // 2, None, PLAYER_SPEED, 100)
         self.enemy = Enemy(enemy_animation, self.width // 2 + 200, self.height // 2, ALL_OBJECTS, PLAYER_SPEED, 100)
@@ -39,7 +45,7 @@ class Window(pyglet.window.Window):
         self.hotbar.set_item(wood_staff_storage, 2)
         self.selected_item = None
 
-        self.map_manager = MapManager(self.player)
+        self.map_manager = MapManager(self.player, self.particle_factory)
         self.map_manager.load_map_from_bat()
         self.map_manager.add_entity(self.enemy)
         self.map_manager.add_entity(self.enemy2)
@@ -50,6 +56,9 @@ class Window(pyglet.window.Window):
     def update(self, dt):
         self.selected_item = self.hotbar.get_selected_item()
         self.map_manager.update_entities(dt)
+        dx, dy = self.camera.get_camera_delta()
+        self.map_manager.update_particles(dx, dy, dt)
+        self.enemy2.x += 10*dt
         self.healthbar.hp = self.player.hp
         for chunk in self.map_manager.get_closes_chunks(self.player.x):
             for entity in chunk.entities:
@@ -98,6 +107,7 @@ class Window(pyglet.window.Window):
             self.map_manager.render()
             self.player.draw()
             ALL_OBJECTS.draw()
+            self.particle_factory.manager.draw()
         self.fps_display.draw()
         self.hotbar.draw()
         self.healthbar.draw()

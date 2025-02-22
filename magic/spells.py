@@ -19,3 +19,17 @@ heal_hand = BaseSpell("Heal Hand",
                       cast_range=600,
                       radius=0
                       )
+
+teleport = BaseSpell("Teleport",
+                     PointCast(),
+                     InstantDelivery(),
+                     [InstanceTimeRule(Teleport())],
+                     cast_range=800,
+                     radius=0)
+
+venom_finger = BaseSpell("Venom finger",
+                         PointCast(),
+                         InstantDelivery(),
+                         [PeriodTimeRule(FixedDamage(1), duration=2, repeat_per_sec=5)],
+                         cast_range=500,
+                         radius=0)

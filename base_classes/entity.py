@@ -65,6 +65,7 @@ class Entity(GameSprite):
         self.update_velocity(acceleration, dt)
         self.update_position(dt)
         self.spell_channeling()
+        self.handle_effect()
         self.update_damage_numbers(dt)
 
     @property
