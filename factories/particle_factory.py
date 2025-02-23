@@ -24,10 +24,13 @@ class ParticleGroupFactory:
                      chaos_width: int = 50,
                      chaos_height: int = 50,
                      color_mod: tuple[float, float, float] = (1., 0., 0.),
+                     color_secondary: Optional[tuple[float, float, float]] = None,
+                     gradient_k: float = 3.0,
                      brightness: float = 0.1) -> ParticleGroup:
         group = ParticleGroup(self.config.program, self.config.ctx, self.config.win_width, self.config.win_height,
                               x, y, radius, life_time, num_particles, velocity_x_range, velocity_y_range,
-                              angles, rebound, loop, chaos, chaos_width, chaos_height, color_mod, brightness)
+                              angles, rebound, loop, chaos, chaos_width, chaos_height,
+                              color_mod, color_secondary, gradient_k, brightness)
         self._particle_manager.append(group)
         return group
 

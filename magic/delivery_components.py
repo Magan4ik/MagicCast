@@ -8,10 +8,14 @@ class ProjectileDelivery(DeliveryComponent):
         super().__init__()
         self.speed = speed
         self.color = color
-        self.particle_group_config["color_mod"] = self.color[0] / 255, self.color[1] / 255, self.color[2] / 255
+        self.particle_group_config["color_mod"] = (1., 0.8, 0.8)
         self.particle_group_config["life_time"] = 1
-        self.particle_group_config["velocity_x_range"] = (0.2, 1)
+        self.particle_group_config["velocity_x_range"] = (0.4, 1.2)
         self.particle_group_config["velocity_x_range"] = (0.08, 0.8)
+        self.particle_group_config["color_secondary"] = self.color[0] / 255, self.color[1] / 255, self.color[2] / 255
+        self.particle_group_config["brightness"] = 0.5
+        self.particle_group_config["num_particles"] = 50
+        # self.particle_group_config["rebound"] = True
 
     def deliver(self, area: Area):
         projectile = Projectile(spell_images["fireball"], self.caster.x, self.caster.y,

@@ -10,11 +10,11 @@ class FixedDamage(Effect):
         self.particle_group_config["chaos"] = True
         self.particle_group_config["chaos_width"] = 25
         self.particle_group_config["chaos_height"] = 75
-        self.particle_group_config["num_particles"] = 25
-        self.particle_group_config["radius"] = 100
+        self.particle_group_config["num_particles"] = abs(damage)
+        self.particle_group_config["radius"] = 75
         self.particle_group_config["angles"] = [(3.14 / 2) * -(abs(damage)/damage)]
-        self.particle_group_config["velocity_y_range"] = (0.04, 0.07)
-        self.particle_group_config["brightness"] = 0.01
+        # self.particle_group_config["velocity_y_range"] = (0.04, 0.07)
+        self.particle_group_config["brightness"] = 0.05
 
     def apply_effect(self, target):
         if hasattr(target, "take_damage"):

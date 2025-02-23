@@ -4,10 +4,10 @@ import time
 
 
 class PeriodTimeRule(EffectComponent):
-    def __init__(self, type_effect: Effect, duration: float, repeat_per_sec: int):
+    def __init__(self, type_effect: Effect, duration: float, repeats: int):
         super().__init__(type_effect)
         self.duration = duration
-        self.repeat_per_sec = repeat_per_sec
+        self.repeats = repeats
         self.start_time = None
         self.per_time = None
         self.particle_group_config.update(type_effect.get_particle_config())
@@ -15,6 +15,7 @@ class PeriodTimeRule(EffectComponent):
         self.particle_group_config["life_time"] = duration
         self.particle_group_config["radius"] = 25
         self.particle_group_config["brightness"] += 0.02
+        self.particle_group_config["velocity_y_range"] = (0.008*repeats, 0.014*repeats)
 
     def start(self):
         self.started = True
@@ -30,7 +31,7 @@ class PeriodTimeRule(EffectComponent):
             self.particle_group.world_x = target.x
             self.particle_group.world_y = target.y
         if time.time() - self.start_time <= self.duration:
-            if self.per_time is None or time.time() - self.per_time >= self.duration / self.repeat_per_sec:
+            if self.per_time is None or time.time() - self.per_time >= self.duration / self.repeats:
                 self.per_time = time.time()
                 self.apply_effect(target)
         else:
@@ -40,7 +41,7 @@ class PeriodTimeRule(EffectComponent):
         self.type_effect.apply_effect(target)
 
     def copy(self):
-        return PeriodTimeRule(self.type_effect.copy(), self.duration, self.repeat_per_sec)
+        return PeriodTimeRule(self.type_effect.copy(), self.duration, self.repeats)
 
 
 class InstanceTimeRule(EffectComponent):

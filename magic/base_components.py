@@ -53,6 +53,8 @@ class MagicComponent(ABC):
             "rebound": False, "loop": False, "chaos": False,
             "chaos_width": 50, "chaos_height": 50,
             "color_mod": (1., 0., 0.),
+            "color_secondary": None,
+            "gradient_k": 3.,
             "brightness": 0.1
         }
 

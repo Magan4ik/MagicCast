@@ -18,6 +18,8 @@ class ParticleGroup:
                  chaos_width: int = 50,
                  chaos_height: int = 50,
                  color_mod: tuple[float, float, float] = (1., 0., 0.),
+                 color_secondary: Optional[tuple[float, float, float]] = None,
+                 gradient_k: float = 3.0,
                  brightness: float = 0.1):
         self.prog = program
         self.radius = radius / win_height * 2
@@ -31,6 +33,8 @@ class ParticleGroup:
         self.rebound = rebound
         self.loop = loop
         self.color_mod = color_mod
+        self.color_secondary = color_secondary if color_secondary is not None else color_mod
+        self.gradient_k = gradient_k
         self.brightness = brightness
         self.world_x = x
         self.world_y = y
@@ -78,15 +82,24 @@ class ParticleGroup:
 
         if not self.is_finished:
             self.positions += self.velocities * dt
-            distances = np.linalg.norm(self.positions - self.center, axis=1)
+
+            # Учитываем соотношение сторон экрана при расчёте расстояния
+            aspect_ratio = self.win_width / self.win_height
+            adjusted_positions = self.positions.copy()
+            adjusted_positions[:, 0] *= aspect_ratio  # Коррекция X
+
+            distances = np.linalg.norm(adjusted_positions - np.array(self.center) * np.array([aspect_ratio, 1]), axis=1)
+
             out_of_bounds = distances > self.radius
+
             if self.rebound:
                 self.velocities[out_of_bounds] *= -1
             elif self.loop:
                 self.positions[out_of_bounds] = self.center + (self.positions[out_of_bounds] - self.center) * -1
             else:
                 self.velocities[out_of_bounds] *= 0
-                self.positions[out_of_bounds] *= 100
+                self.positions[out_of_bounds] *= 100  # Уводим частицы далеко за экран
+
             self.vbo.write(self.positions)
 
     def draw(self):
@@ -95,5 +108,7 @@ class ParticleGroup:
         self.prog["iTime"].value = self.time_delta
         self.prog["life_time"].value = self.life_time
         self.prog["color_mod"].value = self.color_mod
+        self.prog["color_secondary"].value = self.color_secondary
         self.prog["brightness"].value = self.brightness
+        self.prog["gradient_k"].value = self.gradient_k
         self.vao.render(moderngl.POINTS)

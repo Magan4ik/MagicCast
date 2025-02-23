@@ -32,6 +32,8 @@ class ParticleGroup:
                  chaos_width: int = 50,
                  chaos_height: int = 50,
                  color_mod: tuple[float, float, float] = (1., 0., 0.),
+                 color_secondary: Optional[tuple[float, float, float]] = None,
+                 gradient_k: float = 3.0,
                  brightness: float = 0.1):
         self.prog = program
         self.radius = radius / win.height * 2
@@ -43,6 +45,8 @@ class ParticleGroup:
         self.rebound = rebound
         self.loop = loop
         self.color_mod = color_mod
+        self.color_secondary = color_secondary if color_secondary is not None else color_mod
+        self.gradient_k = gradient_k
         self.brightness = brightness
 
         pos_x = x / win.width * 2 - 1
@@ -103,7 +107,9 @@ class ParticleGroup:
         self.prog["iTime"].value = self.time_delta
         self.prog["life_time"].value = self.life_time
         self.prog["color_mod"].value = self.color_mod
+        self.prog["color_secondary"].value = self.color_secondary
         self.prog["brightness"].value = self.brightness
+        self.prog["gradient_k"].value = self.gradient_k
         self.vao.render(moderngl.POINTS)
 
 
@@ -148,9 +154,10 @@ class ParticleManager:
         ParticleManager.reset_gl()
 
 
-explosion = ParticleGroup(program, 300, 200, 100, 1,
-                          velocity_x_range=(0.2, 1),
-                          velocity_y_range=(0.08, 0.8), rebound=False, color_mod=(1., 0.2, 0.2))
+explosion = ParticleGroup(program, 300, 200, 100, 10,
+                          velocity_x_range=(0.02, 1.),
+                          velocity_y_range=(0.008, 0.8), rebound=False,
+                          color_mod=(1., 0.8, 0.8), color_secondary=(0.769, 0.055, 0.055), brightness=0.5, gradient_k=5)
 heal = ParticleGroup(program, 1000, 300, 75, 1, angles=[np.pi / 2], chaos=True, color_mod=(0., 1., 0.5),
                      num_particles=25, chaos_width=25, chaos_height=75, brightness=0.03)
 
