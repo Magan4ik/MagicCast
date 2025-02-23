@@ -30,7 +30,11 @@ class Area:
             possible_targets = chunk.sprites + chunk.entities
             for t in possible_targets:
                 if self.radius > 0:
-                    if math.sqrt((self.x - t.x) ** 2 + (self.y - t.y) ** 2) <= self.radius:
+                    closest_x = max(t.left, min(self.x, t.right))
+                    closest_y = max(t.bottom, min(self.y, t.top))
+                    distance = math.sqrt((self.x - closest_x) ** 2 + (self.y - closest_y) ** 2)
+
+                    if distance <= self.radius:
                         targets.append(t)
                 else:
                     if t.collide_point((self.x, self.y)):
