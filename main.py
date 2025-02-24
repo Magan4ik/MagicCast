@@ -31,7 +31,7 @@ class Window(pyglet.window.Window):
 
         self.player = Player(player_animation, self.width // 2, self.height // 2, None, PLAYER_SPEED, 100)
         self.enemy = Enemy(enemy_animation, self.width // 2 + 200, self.height // 2, ALL_OBJECTS, PLAYER_SPEED, 100)
-        self.enemy2 = Enemy(enemy_animation, self.width // 2 + 400, self.height // 2, ALL_OBJECTS, PLAYER_SPEED, 100)
+        self.enemy2 = Enemy(enemy_animation, self.width // 2 + 400, self.height // 2, ALL_OBJECTS, PLAYER_SPEED, 400)
 
         self.hotbar = HotBar(50, self.height - 50, 64, 64, self.player, slots_amount=9, selected_slot=1)
         self.healthbar = HealthBar(ui_images["player_health_bar"],

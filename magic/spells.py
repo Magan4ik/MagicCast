@@ -7,7 +7,7 @@ from .effects import FixedDamage, Teleport
 fireball = BaseSpell("Fireball",
                      PointCast(),
                      ProjectileDelivery(speed=4, color=(int(0.769*255), int(0.055*255), int(0.055*255))),
-                     [InstanceTimeRule(FixedDamage(30)), PeriodTimeRule(FixedDamage(2), 4, 10)],
+                     [InstanceTimeRule(FixedDamage(30)), PeriodTimeRule(FixedDamage(1), 4, 25)],
                      cast_range=600,
                      radius=100
                      )
