@@ -7,6 +7,7 @@ FULLSCREEN = False
 FPS = 120
 KEYBOARD = key.KeyStateHandler()
 ALL_OBJECTS = pyglet.graphics.Batch()
+HPBAR_SEP_VALUE = 25
 
 KEY_NUMBERS = {
     key._1: 1,
