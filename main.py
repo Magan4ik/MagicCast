@@ -37,7 +37,7 @@ class Window(pyglet.window.Window):
 
         wood_staff_storage = Staff("wood_staff", item_images["staffs"]["wood_staff"],
                                    storage_images["staffs"]["wood_staff"], None, (50, 500), (150, 400))
-        wood_staff_storage.set_item(SpellItem(spell_icons[0], fireball, batch=None), 1)
+        wood_staff_storage.set_item(SpellItem(spell_icons[0], teleport, batch=None), 1)
         wood_staff_storage.set_item(SpellItem(spell_icons[0], heal_hand, batch=None), 0)
         self.hotbar.set_item(wood_staff_storage, 2)
         self.selected_item = None

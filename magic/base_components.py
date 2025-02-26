@@ -73,10 +73,11 @@ class CastComponent(MagicComponent, ABC):
 
 
 class Effect(MagicComponent, ABC):
-    def __init__(self):
+    def __init__(self, self_cast: bool = False):
         super().__init__()
         self.targets = None
         self.area: Optional[Area] = None
+        self.self_cast = self_cast
 
     def set_caster(self, caster: GameSprite):
         self.caster = caster
@@ -107,12 +108,11 @@ class EffectComponent(MagicComponent, ABC):
         pass
 
     def handle(self, targets):
-        if len(targets) > 0:
-            for target in targets:
-                target.effects.append(self.copy())
-        # TODO: fix teleport handle
-        # else:
-        #     self.caster.effects.append(self.copy())
+        if self.type_effect.self_cast:
+            self.caster.effects.append(self.copy())
+            return
+        for target in targets:
+            target.effects.append(self.copy())
 
     @abstractmethod
     def copy(self):

@@ -28,6 +28,17 @@ class FixedDamage(Effect):
 
 
 class Teleport(Effect):
+    def __init__(self):
+        super().__init__(self_cast=True)
+        self.particle_group_config["color_mod"] = (0.761, 0.18, 1)
+        self.particle_group_config["color_secondary"] = (0.392, 0.031, 0.541)
+        self.particle_group_config["gradient_k"] = 8
+        self.particle_group_config["num_particles"] = 50
+        self.particle_group_config["radius"] = 50
+        self.particle_group_config["rebound"] = True
+        self.particle_group_config["velocity_x_range"] = (0.5, 2)
+        self.particle_group_config["velocity_y_range"] = (0.5, 2)
+        self.particle_group_config["brightness"] = 0.5
 
     def apply_effect(self, target):
         if self.area is None: return
@@ -40,4 +51,5 @@ class Teleport(Effect):
         eff = Teleport()
         eff.area = self.area
         eff.caster = self.caster
+        eff.self_cast = self.self_cast
         return eff
