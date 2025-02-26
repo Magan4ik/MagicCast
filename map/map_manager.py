@@ -7,6 +7,7 @@ from base_classes.entity import Entity
 from base_classes.game_sprite import GameSprite
 from factories.block_factory import BlockFactory
 from factories.particle_factory import ParticleGroupFactory
+from map.camera import TargetCamera
 from map.chunk import Chunk
 from particles.particle_manager import ParticleManager
 from settings.settings import *
@@ -100,9 +101,9 @@ class MapManager:
                 except KeyError:
                     print("Out of a chunk")
 
-    def update_particles(self, dx, dy, dt):
-        self.particle_factory.manager.move(dx, dy)
-        self.particle_factory.manager.update(dt)
+    def update_particles(self, camera: TargetCamera, dt: float):
+        self.particle_factory.manager.move(camera)
+        self.particle_factory.manager.update(camera, dt)
 
     def render(self):
         for chunk in self.get_visible_chunks():

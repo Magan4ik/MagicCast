@@ -4,6 +4,8 @@ from typing import Optional
 import moderngl
 import numpy as np
 
+from map.camera import TargetCamera
+
 
 class ParticleGroup:
     def __init__(self, program: moderngl.Program, ctx: moderngl.Context, win_width: int, win_height: int,
@@ -20,7 +22,8 @@ class ParticleGroup:
                  color_mod: tuple[float, float, float] = (1., 0., 0.),
                  color_secondary: Optional[tuple[float, float, float]] = None,
                  gradient_k: float = 3.0,
-                 brightness: float = 0.1):
+                 brightness: float = 0.1,
+                 zoom: float = 1):
         self.prog = program
         self.radius = radius / win_height * 2
         self.win_width = win_width
@@ -38,6 +41,9 @@ class ParticleGroup:
         self.brightness = brightness
         self.world_x = x
         self.world_y = y
+        self.zoom = zoom
+        chaos_width *= zoom
+        chaos_height *= zoom
 
         self.pos_x = x / win_width * 2 - 1
         self.pos_y = y / win_height * 2 - 1
@@ -64,43 +70,47 @@ class ParticleGroup:
         self.vbo = ctx.buffer(self.positions)
         self.vao = ctx.simple_vertex_array(self.prog, self.vbo, "in_position")
 
-    def move(self, dx: float, dy: float):
-        screen_dx = (self.world_x + dx) / self.win_width * 2 - 1
-        screen_dy = (self.world_y + dy) / self.win_height * 2 - 1
+    def move(self, camera: TargetCamera):
+        screen_x, screen_y = camera.world_to_screen_pos(self.world_x, self.world_y)
+        screen_x = (screen_x / self.win_width * 2 - 1)
+        screen_y = (screen_y / self.win_height * 2 - 1)
 
-        shift = np.array([screen_dx, screen_dy], dtype="f4") - self.center
+        shift_x = screen_x - self.center[0]
+        shift_y = screen_y - self.center[1]
+
+        shift = np.array([shift_x, shift_y], dtype="f4")
         self.center += shift
         self.positions += shift
         self.vbo.write(self.positions)
 
-    def update(self, dt):
+    def update(self, camera: TargetCamera, dt: float):
         self.time_delta = time.time() - self.start_time
         if self.time_delta >= self.life_time:
             self.is_finished = True
             self.vbo.release()
             self.vao.release()
+            return
 
-        if not self.is_finished:
-            self.positions += self.velocities * dt
+        self.zoom = camera.zoom
+        self.positions += self.velocities * dt * self.zoom
 
-            # Учитываем соотношение сторон экрана при расчёте расстояния
-            aspect_ratio = self.win_width / self.win_height
-            adjusted_positions = self.positions.copy()
-            adjusted_positions[:, 0] *= aspect_ratio  # Коррекция X
+        aspect_ratio = self.win_width / self.win_height
+        adjusted_positions = self.positions.copy()
+        adjusted_positions[:, 0] *= aspect_ratio
 
-            distances = np.linalg.norm(adjusted_positions - np.array(self.center) * np.array([aspect_ratio, 1]), axis=1)
+        distances = np.linalg.norm(adjusted_positions - np.array(self.center) * np.array([aspect_ratio, 1]), axis=1)
 
-            out_of_bounds = distances > self.radius
+        out_of_bounds = distances > self.radius*self.zoom
 
-            if self.rebound:
-                self.velocities[out_of_bounds] *= -1
-            elif self.loop:
-                self.positions[out_of_bounds] = self.center + (self.positions[out_of_bounds] - self.center) * -1
-            else:
-                self.velocities[out_of_bounds] *= 0
-                self.positions[out_of_bounds] *= 100  # Уводим частицы далеко за экран
+        if self.rebound:
+            self.velocities[out_of_bounds] *= -1
+        elif self.loop:
+            self.positions[out_of_bounds] = self.center + (self.positions[out_of_bounds] - self.center) * -1
+        else:
+            self.velocities[out_of_bounds] *= 0
+            self.positions[out_of_bounds] *= 100
 
-            self.vbo.write(self.positions)
+        self.vbo.write(self.positions)
 
     def draw(self):
         if self.is_finished: return
@@ -111,4 +121,5 @@ class ParticleGroup:
         self.prog["color_secondary"].value = self.color_secondary
         self.prog["brightness"].value = self.brightness
         self.prog["gradient_k"].value = self.gradient_k
+        self.prog["iZoom"].value = self.zoom
         self.vao.render(moderngl.POINTS)

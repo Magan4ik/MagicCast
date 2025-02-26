@@ -26,9 +26,6 @@ class Window(pyglet.window.Window):
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
 
-        shader_config = shader_setup.setup(self.width, self.height)
-        self.particle_factory = ParticleGroupFactory(shader_config)
-
         self.player = Player(player_animation, self.width // 2, self.height // 2, None, PLAYER_SPEED, 100)
         self.enemy = Enemy(enemy_animation, self.width // 2 + 200, self.height // 2, ALL_OBJECTS, PLAYER_SPEED, 100)
         self.enemy2 = Enemy(enemy_animation, self.width // 2 + 400, self.height // 2, ALL_OBJECTS, PLAYER_SPEED, 400)
@@ -45,25 +42,27 @@ class Window(pyglet.window.Window):
         self.hotbar.set_item(wood_staff_storage, 2)
         self.selected_item = None
 
+        self.camera = TargetCamera(self, self.player, scroll_speed=1, min_zoom=1, max_zoom=4)
+
+        shader_config = shader_setup.setup(self.width, self.height)
+        self.particle_factory = ParticleGroupFactory(shader_config, self.camera)
+
         self.map_manager = MapManager(self.player, self.particle_factory)
         self.map_manager.load_map_from_bat()
         self.map_manager.add_entity(self.enemy)
         self.map_manager.add_entity(self.enemy2)
         self.map_manager.add_entity(self.player)
 
-        self.camera = TargetCamera(self, self.player, scroll_speed=1, min_zoom=1, max_zoom=4)
-
     def update(self, dt):
         self.selected_item = self.hotbar.get_selected_item()
         self.map_manager.update_entities(dt)
-        dx, dy = self.camera.get_camera_delta()
-        self.map_manager.update_particles(dx, dy, dt)
-        self.enemy2.x += 10*dt
+        self.map_manager.update_particles(self.camera, dt)
+        self.enemy2.x += 10 * dt
         self.healthbar.hp = self.player.hp
         for chunk in self.map_manager.get_closes_chunks(self.player.x):
             for entity in chunk.entities:
                 if isinstance(entity, Item):
-                    if math.sqrt((self.player.x - entity.x)**2 + (self.player.y - entity.y)**2) <= 100:
+                    if math.sqrt((self.player.x - entity.x) ** 2 + (self.player.y - entity.y) ** 2) <= 100:
                         if entity.check_pickup(self.player):
                             chunk.remove_entity(entity)
                             self.hotbar.set_item(entity)

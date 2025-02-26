@@ -1,5 +1,6 @@
 from pyglet import gl
 
+from map.camera import TargetCamera
 from particles.particle_group import ParticleGroup
 
 
@@ -13,9 +14,9 @@ class ParticleManager:
     def remove(self, particle_group: ParticleGroup):
         self.particle_groups.remove(particle_group)
 
-    def move(self, dx: float, dy: float):
+    def move(self, camera: TargetCamera):
         for group in self.particle_groups:
-            group.move(dx, dy)
+            group.move(camera)
 
     @staticmethod
     def init_gl():
@@ -31,9 +32,9 @@ class ParticleManager:
         gl.glDisable(gl.GL_BLEND)
         gl.glBlendFunc(gl.GL_ONE, gl.GL_ZERO)
 
-    def update(self, dt):
+    def update(self, camera: TargetCamera, dt: float):
         for group in self.particle_groups:
-            group.update(dt)
+            group.update(camera, dt)
             if group.is_finished:
                 self.remove(group)
 

@@ -67,7 +67,7 @@ class CastComponent(MagicComponent, ABC):
         super().__init__()
 
     @abstractmethod
-    def get_target(self, mouse_pos: tuple[int, int], cast_range: int,
+    def get_target(self, mouse_pos: tuple[float, float], cast_range: int,
                    radius: int, objects: list[PhysObject]) -> Optional[Area]:
         pass
 
@@ -168,7 +168,7 @@ class BaseSpell(ABC):
                 effect.handle(self.area.targets)
             self.reset()
 
-    def cast(self, mouse_pos: tuple[int, int], caster: GameSprite, map_manager: MapManager):
+    def cast(self, mouse_pos: tuple[float, float], caster: GameSprite, map_manager: MapManager):
         if self.casting: return
         self.map_manager = map_manager
         self.caster = caster
