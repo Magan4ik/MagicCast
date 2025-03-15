@@ -77,10 +77,10 @@ class TargetCamera(Camera):
 
     def begin(self):
         x = self.target.x - self._window.width // 2 / self._zoom
-        if self.target.y >= self._window.height // 2:
-            y = self.target.y - self._window.height // 2 / self._zoom
-        else:
-            y = self.offset_y
+
+        min_y = self.offset_y
+        target_y = self.target.y - self._window.height // 2 / self._zoom
+        y = max(min_y, target_y)
 
         view_matrix = self._window.view.translate((-x * self._zoom, -y * self._zoom, 0))
         view_matrix = view_matrix.scale((self._zoom, self._zoom, 1))
@@ -88,20 +88,46 @@ class TargetCamera(Camera):
 
     def end(self):
         x = self.target.x - self._window.width // 2 / self._zoom
-        if self.target.y >= self._window.height // 2:
-            y = self.target.y - self._window.height // 2 / self._zoom
-        else:
-            y = self.offset_y
+
+        min_y = self.offset_y
+        target_y = self.target.y - self._window.height // 2 / self._zoom
+        y = max(min_y, target_y)
 
         view_matrix = self._window.view.scale((1 / self._zoom, 1 / self._zoom, 1))
         view_matrix = view_matrix.translate((x * self._zoom, y * self._zoom, 0))
         self._window.view = view_matrix
 
-    def normalize_mouse_pos(self, x, y) -> tuple[float, float]:
+    def get_camera_delta(self):
         dx = self._window.width // 2 - self.target.x
-        dy = 0
+
+        min_y = self.offset_y
+        target_y = self._window.height // 2 - self.target.y
+        dy = min_y
         if self.target.y >= self._window.height // 2:
-            dy = self._window.height // 2 - self.target.y
-        x = x - dx
-        y = y - dy
-        return x, y
+            dy += target_y
+        else:
+            dy += target_y - target_y/self.zoom
+
+        return dx, dy
+
+    def normalize_mouse_pos(self, x, y) -> tuple[float, float]:
+        world_x = (x - self._window.width / 2) / self._zoom + self.target.x
+        world_y = (y - self._window.height / 2) / self._zoom + self.target.y
+
+        min_y = self.offset_y
+        target_y = self.target.y - self._window.height // 2 / self.zoom
+        world_y = max(min_y, target_y) + (world_y - target_y)
+
+        return world_x, world_y
+
+    def world_to_screen_pos(self, world_x, world_y) -> tuple[float, float]:
+        screen_x = (world_x - self.target.x) * self._zoom + self._window.width / 2
+        screen_y = (world_y - self.target.y) * self._zoom + self._window.height / 2
+
+        min_y = self.offset_y
+        target_y = self.target.y - self._window.height // 2 / self._zoom
+        screen_y -= max(min_y, target_y) * self._zoom - target_y * self._zoom
+
+        return screen_x, screen_y
+
+

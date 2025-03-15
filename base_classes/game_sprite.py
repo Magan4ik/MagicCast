@@ -18,6 +18,15 @@ class GameSprite(PhysObject):
         for spell in self.active_spells:
             spell.channeling()
 
+    def handle_effect(self):
+        for effect in self.effects:
+            if not effect.started:
+                effect.start()
+            if not effect.is_finished:
+                effect.update(self)
+            else:
+                self.effects.remove(effect)
+
     def collide(self, other: "GameSprite"):
         if not other.background:
             return super().collide(other)
