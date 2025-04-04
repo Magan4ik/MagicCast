@@ -16,15 +16,12 @@ class Player(Entity):
     def control(self, dt):
         if KEYBOARD[key.D]:
             if abs(self.velocity.x) < self.speed:
-                self.velocity = Vec2(self.speed, self.velocity.y)
+                self.velocity = Vec2(self.speed*dt, self.velocity.y)
             self.scale_x = 1
         elif KEYBOARD[key.A]:
             if abs(self.velocity.x) < self.speed:
-                self.velocity = Vec2(-self.speed, self.velocity.y)
-            self.update_forces(move=Vec2(-self.speed, 0))
+                self.velocity = Vec2(-self.speed*dt, self.velocity.y)
             self.scale_x = -1
-        else:
-            self.update_forces(move=Vec2(0, 0))
 
         if KEYBOARD[key.SPACE]:
             self.velocity = Vec2(self.velocity.x, PLAYER_JUMP_POWER)

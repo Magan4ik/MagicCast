@@ -15,10 +15,10 @@ class CoordinateObject:
     def collide(self, other: "CoordinateObject"):
         if isinstance(other, CoordinateObject):
             return (
-                    self.left < other.right and
-                    self.right > other.left and
-                    self.bottom < other.top and
-                    self.top > other.bottom
+                    self.left <= other.right and
+                    self.right >= other.left and
+                    self.bottom <= other.top and
+                    self.top >= other.bottom
             )
         raise TypeError("Can't check collision with non-CoordinateObject object")
 

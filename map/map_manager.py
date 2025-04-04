@@ -81,11 +81,11 @@ class MapManager:
             for entity in chunk.entities:
                 entity.update_forces(gravity=Vec2(0, -10000))
                 entity.do_air_friction()
+                entity.handle(dt)
                 for closes_chunk in self.get_closes_chunks(entity.x):
                     for obj in closes_chunk.sprites:
                         entity.calculate_collide(obj)
 
-                entity.handle(dt)
                 for effect in entity.effects:
                     if effect.particle_group is None:
                         particle_config = effect.get_particle_config()

@@ -25,8 +25,8 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
         if force_name in self.forces:
             del self.forces[force_name]
 
-    def calculate_acceleration(self) -> Vec2:
-        force = sum(self.forces.values()) if self.forces else Vec2(0, 0)
+    def calculate_acceleration(self, *ignore) -> Vec2:
+        force = sum(force for name, force in self.forces.items() if name not in ignore) if self.forces else Vec2(0, 0)
         acceleration = force.length() / self.mass
         return Vec2.from_heading(force.heading(), acceleration)
 
@@ -43,23 +43,22 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
                 dx = min(self.right - other.left, other.right - self.left)
                 dy = min(self.top - other.bottom, other.top - self.bottom)
                 if dx < dy:
-                    if other.left < self.left < other.right:
-                        normal = Vec2(1, 0)
-                        self.left = other.right
-                    else:
+                    if self.right - other.left < other.right - self.left:
                         normal = Vec2(-1, 0)
                         self.right = other.left
-                else:
-                    if other.bottom < self.bottom < other.top:
-                        normal = Vec2(0, 1)
-                        self.bottom = other.top
                     else:
+                        normal = Vec2(1, 0)
+                        self.left = other.right
+                else:
+                    if self.top - other.bottom < other.top - self.bottom:
                         normal = Vec2(0, -1)
                         self.top = other.bottom
-                acceleration = self.calculate_acceleration()
+                    else:
+                        normal = Vec2(0, 1)
+                        self.bottom = other.top
+                acceleration = self.calculate_acceleration(f"normal_reaction_{id(other)}")
                 force = self.mass * acceleration
-                normal_force = -force.dot(normal)
-                normal_react = normal * normal_force
+                normal_react = self.normal_reaction_force(normal, force)
                 total_elastic = (self.elastic*other.elastic)/(self.elastic+other.elastic)
                 normal_component = normal * self.velocity.dot(normal)
                 new_velocity = (self.velocity - normal_component) + (-normal_component * total_elastic)
@@ -67,10 +66,10 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
                 other_impulse = other.mass * other.velocity
                 new_other_impulse = self_impulse + other_impulse - (self.mass*new_velocity)
                 new_other_velocity = new_other_impulse / other.mass
-                tangent = pyglet.math.Vec2(-normal.y, normal.x).normalize()
+                tangent = Vec2(-normal.y, normal.x).normalize()
                 tangent_direction = tangent if new_velocity.dot(tangent) > 0 else -tangent
                 friction_magnitude = other.friction_mu * normal_react.length()
-                if abs(new_velocity.x) < 0.5:
+                if abs(new_velocity.x) < 5:
                     friction_magnitude = 0
                     new_velocity = Vec2(0, new_velocity.y)
                 friction = -tangent_direction * friction_magnitude
@@ -78,7 +77,8 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
                 forces = {f"normal_reaction_{id(other)}": normal_react, f"friction_{id(other)}": friction}
                 self.update_forces(**forces)
                 other.velocity = new_other_velocity
-                self.velocity = new_velocity
+                if new_velocity.dot(normal) > 0:
+                    self.velocity = new_velocity
             else:
                 self.remove_force(f"normal_reaction_{id(other)}")
                 self.remove_force(f"friction_{id(other)}")
@@ -94,6 +94,17 @@ class PhysObject(pyglet.sprite.Sprite, CoordinateObject):
             force = Vec2(force.y, 0)
 
         return force
+
+    def normal_reaction_force(self, normal, resultant_force):
+        normal = normal.normalize()
+
+        projection = resultant_force.dot(normal)
+        if resultant_force.x * normal.x > 0 or resultant_force.y * normal.y > 0:
+            normal_reaction = Vec2(0, 0)
+        else:
+            normal_reaction = abs(projection) * normal
+
+        return normal_reaction
 
     def do_air_friction(self):
         friction = self.air_resistance_force(self.width, self.height, self.velocity)

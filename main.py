@@ -1,5 +1,6 @@
 import math
 
+import pyglet.shapes
 from pyglet.math import Vec2
 
 from factories.particle_factory import ParticleGroupFactory
@@ -27,8 +28,10 @@ class Window(pyglet.window.Window):
         self.push_handlers(KEYBOARD)
 
         self.player = Player(player_animation, self.width // 2, self.height // 2, None, PLAYER_SPEED, 100)
-        self.enemy = Enemy(enemy_animation, self.width // 2 + 200, self.height // 2, ALL_OBJECTS, PLAYER_SPEED, 100)
-        self.enemy2 = Enemy(enemy_animation, self.width // 2 + 400, self.height // 2, ALL_OBJECTS, PLAYER_SPEED, 400)
+        self.enemy = Enemy(enemy_animation, self.width // 2 + 200, self.height // 2 - 150, None, PLAYER_SPEED, 100,
+                           elastic=0.5)
+        self.enemy2 = Enemy(enemy_animation, self.width // 2 + 400, self.height // 2, None, PLAYER_SPEED, 400,
+                            elastic=0.5)
 
         self.hotbar = HotBar(50, self.height - 50, 64, 64, self.player, slots_amount=9, selected_slot=1)
         self.healthbar = HealthBar(ui_images["player_health_bar"],
@@ -36,9 +39,10 @@ class Window(pyglet.window.Window):
                                    self.height - 50, max_hp=100, batch=None)
 
         wood_staff_storage = Staff("wood_staff", item_images["staffs"]["wood_staff"],
-                                   storage_images["staffs"]["wood_staff"], None, (50, 500), (150, 400))
+                                   storage_images["staffs"]["wood_staff"], None, (50, 500), (150, 400), (50, 350))
         wood_staff_storage.set_item(SpellItem(spell_icons[0], teleport, batch=None), 1)
         wood_staff_storage.set_item(SpellItem(spell_icons[0], heal_hand, batch=None), 0)
+        wood_staff_storage.set_item(SpellItem(spell_icons[0], fireball, batch=None), 2)
         self.hotbar.set_item(wood_staff_storage, 2)
         self.selected_item = None
 
@@ -53,11 +57,13 @@ class Window(pyglet.window.Window):
         self.map_manager.add_entity(self.enemy2)
         self.map_manager.add_entity(self.player)
 
+        self.hitbox_mode = False
+
     def update(self, dt):
         self.selected_item = self.hotbar.get_selected_item()
         self.map_manager.update_entities(dt)
         self.map_manager.update_particles(self.camera, dt)
-        self.enemy2.x += 10 * dt
+        self.enemy2.velocity = Vec2(4000 * dt, self.enemy2.velocity.y)
         self.healthbar.hp = self.player.hp
         for chunk in self.map_manager.get_closes_chunks(self.player.x):
             for entity in chunk.entities:
@@ -79,6 +85,9 @@ class Window(pyglet.window.Window):
         if sym == key.Q:
             self.hotbar.throw_item(self.map_manager)
 
+        if sym == key.H and mod & key.MOD_CTRL:
+            self.hitbox_mode = not self.hitbox_mode
+
     def on_mouse_press(self, x, y, but, mod):
         x, y = self.camera.normalize_mouse_pos(x, y)
         selected_item = self.hotbar.get_selected_item()
@@ -99,13 +108,35 @@ class Window(pyglet.window.Window):
         elif scroll_y < 0:
             self.camera.zoom -= 0.5
 
+    def draw_entity_forces(self, entity):
+        for name, force in entity.forces.items():
+            if "normal" in name:
+                pyglet.shapes.Line(entity.x, entity.y, entity.x + force.x / 100,
+                                   entity.y + force.y / 100, color=(200, 50, 50), thickness=1).draw()
+
+    def draw_entity_hitboxes(self):
+        for chunk in self.map_manager.get_closes_chunks(self.player.x):
+            for entity in chunk.entities:
+                pyglet.shapes.Box(entity.left, entity.bottom, entity.width, entity.height, thickness=1,
+                                  color=(100, 100, 255)).draw()
+                self.draw_entity_forces(entity)
+
+    def draw_entity_velocity(self, entity):
+        pyglet.shapes.Line(
+            entity.x, entity.y, entity.x + entity.velocity.x, entity.y + entity.velocity.y,
+            thickness=1, color=(100, 100, 255)
+        ).draw()
+
     def on_draw(self):
         self.clear()
         BACKGROUND_IMAGE.blit(self.width // 2, self.height // 2)
         with self.camera:
             self.map_manager.render()
-            self.player.draw()
             ALL_OBJECTS.draw()
+            if self.hitbox_mode:
+                self.draw_entity_forces(self.player)
+                self.draw_entity_hitboxes()
+                self.draw_entity_velocity(self.player)
             self.particle_factory.manager.draw()
         self.fps_display.draw()
         self.hotbar.draw()
