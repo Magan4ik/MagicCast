@@ -1,7 +1,8 @@
 from typing import Optional
 
-from base_classes.entity import Entity, HealthBar
+from base_classes.entity import Entity
 from settings.settings import *
+from ui.health_bar import EntityHealthBar
 from base_classes.game_sprite import GameSprite
 from pyglet.math import Vec2
 
@@ -12,9 +13,8 @@ class Enemy(Entity):
                  speed: int, hp: int = 100,
                  mass: float = DEFAULT_MASS, elastic: float = 0, *args, **kwargs):
         super().__init__(img, x, y, batch, speed, hp, mass=mass, elastic=elastic)
-        self.hpbar = HealthBar(self, hp, hp)
+        self.hpbar = EntityHealthBar(self, hp, hp)
 
     def handle(self, dt):
-        self.hpbar.hp = self.hp
-        self.hpbar.update()
+        self.hpbar.update(hp=self.hp)
         super().handle(dt)

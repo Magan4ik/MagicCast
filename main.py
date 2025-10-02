@@ -12,7 +12,7 @@ from sprites.enemy import Enemy
 from sprites.player import Player
 from pyglet.window import FPSDisplay, key
 
-from ui.health_bar import HealthBar
+from ui.health_bar import PlayerHealthBar
 from ui.hot_bar import HotBar
 from ui.item import Item, SpellItem
 from ui.storage import Storage, Staff
@@ -34,9 +34,9 @@ class Window(pyglet.window.Window):
                             elastic=0.5)
 
         self.hotbar = HotBar(50, self.height - 50, 64, 64, self.player, slots_amount=9, selected_slot=1)
-        self.healthbar = HealthBar(ui_images["player_health_bar"],
-                                   self.width - ui_images["player_health_bar"].get_texture().width // 2 - 50,
-                                   self.height - 50, max_hp=100, batch=None)
+        self.healthbar = PlayerHealthBar(ui_images["player_health_bar"],
+                                         self.width - ui_images["player_health_bar"].get_texture().width // 2 - 50,
+                                         self.height - 50, max_hp=100, batch=None)
 
         wood_staff_storage = Staff("wood_staff", item_images["staffs"]["wood_staff"],
                                    storage_images["staffs"]["wood_staff"], None, (50, 500), (150, 400), (50, 350))
@@ -64,7 +64,7 @@ class Window(pyglet.window.Window):
         self.map_manager.update_entities(dt)
         self.map_manager.update_particles(self.camera, dt)
         self.enemy2.velocity = Vec2(4000 * dt, self.enemy2.velocity.y)
-        self.healthbar.hp = self.player.hp
+        self.healthbar.update(hp=self.player.hp)
         for chunk in self.map_manager.get_closes_chunks(self.player.x):
             for entity in chunk.entities:
                 if isinstance(entity, Item):
