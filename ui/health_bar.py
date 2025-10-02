@@ -42,7 +42,7 @@ class PlayerHealthBar(pyglet.sprite.Sprite, BaseHealthBar):
 
     def update(self, *args, hp: int | None = None, **kwargs) -> None:
         super().update(*args, **kwargs)
-        if hp:
+        if hp is not None:
             self.hp = hp
             self.health_rect.width = self.percent * self.max_width
 
@@ -95,7 +95,7 @@ class EntityHealthBar(pyglet.shapes.Rectangle, BaseHealthBar):
                     line.batch = self.entity.batch
 
     def update(self, hp: int | None = None):
-        if hp:
+        if hp is not None:
             self.hp = hp
         self.x = self.entity.left
         self.y = self.entity.top + 10
