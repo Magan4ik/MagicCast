@@ -78,6 +78,7 @@ class Effect(MagicComponent, ABC):
         self.targets = None
         self.area: Optional[Area] = None
         self.self_cast = self_cast
+        self.mana_cost = 0
 
     def set_caster(self, caster: GameSprite):
         self.caster = caster
@@ -107,6 +108,10 @@ class EffectComponent(MagicComponent, ABC):
     def update(self, target):
         pass
 
+    @abstractmethod
+    def get_mana_cost(self) -> int:
+        pass
+
     def handle(self, targets):
         if self.type_effect.self_cast:
             self.caster.effects.append(self.copy())
@@ -125,6 +130,7 @@ class DeliveryComponent(MagicComponent, ABC):
         super().__init__()
         self.channeling_object = None
         self.is_finished = False
+        self.mana_coef = 1
 
     def channeling(self):
         if self.channeling is not None:
@@ -150,6 +156,12 @@ class BaseSpell(ABC):
         self.casting = False
         self.map_manager: Optional[MapManager] = None
         self.radius = radius
+        self.mana_cost = self._calculate_mana_cost()
+
+    def _calculate_mana_cost(self):
+        mana_cost = self.delivery_component.mana_coef * sum(com.get_mana_cost() for com in self.effect_components)
+        mana_cost += self.cast_range * 0.5 + self.radius * 0.5
+        return mana_cost
 
     def channeling(self):
         self.area.update_pos()

@@ -33,3 +33,10 @@ venom_finger = BaseSpell("Venom finger",
                          [PeriodTimeRule(FixedDamage(1), duration=2, repeats=5)],
                          cast_range=500,
                          radius=0)
+
+healing_aura = BaseSpell("Healing Aura",
+                         SelfCast(),
+                         InstantDelivery(),
+                         [InstanceTimeRule(FixedDamage(-20)), PeriodTimeRule(FixedDamage(-2), 10, 20)],
+                         cast_range=0,
+                         radius=500)

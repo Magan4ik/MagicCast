@@ -15,6 +15,7 @@ class FixedDamage(Effect):
         self.particle_group_config["angles"] = [(3.14 / 2) * -(abs(damage)/damage)]
         # self.particle_group_config["velocity_y_range"] = (0.04, 0.07)
         self.particle_group_config["brightness"] = 0.05
+        self.mana_cost = int(10*abs(damage))
 
     def apply_effect(self, target):
         if hasattr(target, "take_damage"):
@@ -39,6 +40,7 @@ class Teleport(Effect):
         self.particle_group_config["velocity_x_range"] = (0.5, 2)
         self.particle_group_config["velocity_y_range"] = (0.5, 2)
         self.particle_group_config["brightness"] = 0.5
+        self.mana_cost = 1000
 
     def apply_effect(self, target):
         if self.area is None: return

@@ -1,6 +1,7 @@
 from base_classes.game_sprite import GameSprite
 from magic.base_components import EffectComponent, Effect, Area
 import time
+import math
 
 
 class PeriodTimeRule(EffectComponent):
@@ -15,7 +16,7 @@ class PeriodTimeRule(EffectComponent):
         self.particle_group_config["life_time"] = duration
         self.particle_group_config["radius"] = 25
         self.particle_group_config["brightness"] += 0.02
-        self.particle_group_config["velocity_y_range"] = (0.008*repeats, 0.014*repeats)
+        self.particle_group_config["velocity_y_range"] = (0.008 * repeats, 0.014 * repeats)
 
     def start(self):
         self.started = True
@@ -42,6 +43,9 @@ class PeriodTimeRule(EffectComponent):
 
     def copy(self):
         return PeriodTimeRule(self.type_effect.copy(), self.duration, self.repeats)
+
+    def get_mana_cost(self) -> int:
+        return self.type_effect.mana_cost * self.repeats
 
 
 class InstanceTimeRule(EffectComponent):
@@ -70,6 +74,9 @@ class InstanceTimeRule(EffectComponent):
     def copy(self):
         return InstanceTimeRule(self.type_effect.copy())
 
+    def get_mana_cost(self) -> int:
+        return self.type_effect.mana_cost
+
 
 class DelayTimeRule(EffectComponent):
     def __init__(self, type_effect, delay: float):
@@ -93,3 +100,6 @@ class DelayTimeRule(EffectComponent):
 
     def copy(self):
         return DelayTimeRule(self.type_effect.copy(), self.delay)
+
+    def get_mana_cost(self) -> int:
+        return int(self.type_effect.mana_cost / max(0.2, 1 - math.pow(math.pow(math.e, 0.1 * self.delay) - 1, 5)))

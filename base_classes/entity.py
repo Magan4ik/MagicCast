@@ -10,11 +10,13 @@ from random import randint
 class Entity(GameSprite):
     def __init__(self, img,
                  x: float, y: float, batch: Optional[pyglet.graphics.Batch],
-                 speed: int, hp: int = 100,
+                 speed: int, hp: int = 100, mana: int = 1000,
                  mass: float = DEFAULT_MASS, elastic: float = 0, *args, **kwargs):
         super().__init__(img, x, y, batch=batch, mass=mass, elastic=elastic, *args, **kwargs)
         self.max_hp = hp
         self._hp = hp
+        self.max_mana = mana
+        self._mana = mana
         self.speed = speed
         self.damage_numbers = []
 
@@ -51,3 +53,7 @@ class Entity(GameSprite):
     @hp.setter
     def hp(self, value: int):
         self._hp = min(self.max_hp, max(0, value))
+
+    @property
+    def mana(self):
+        return self._mana

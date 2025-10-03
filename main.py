@@ -41,7 +41,7 @@ class Window(pyglet.window.Window):
         wood_staff_storage = Staff("wood_staff", item_images["staffs"]["wood_staff"],
                                    storage_images["staffs"]["wood_staff"], None, (50, 500), (150, 400), (50, 350))
         wood_staff_storage.set_item(SpellItem(spell_icons[0], teleport, batch=None), 1)
-        wood_staff_storage.set_item(SpellItem(spell_icons[0], heal_hand, batch=None), 0)
+        wood_staff_storage.set_item(SpellItem(spell_icons[0], healing_aura, batch=None), 0)
         wood_staff_storage.set_item(SpellItem(spell_icons[0], fireball, batch=None), 2)
         self.hotbar.set_item(wood_staff_storage, 2)
         self.selected_item = None
@@ -95,6 +95,7 @@ class Window(pyglet.window.Window):
             item = selected_item.get_selected_item()
             if isinstance(item, SpellItem):
                 item.spell.cast((x, y), self.player, self.map_manager)
+                print(item.spell.mana_cost)
 
     def on_mouse_release(self, x, y, but, mod):
         pass

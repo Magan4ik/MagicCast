@@ -15,6 +15,7 @@ class ProjectileDelivery(DeliveryComponent):
         self.particle_group_config["color_secondary"] = self.color[0] / 255, self.color[1] / 255, self.color[2] / 255
         self.particle_group_config["brightness"] = 0.5
         self.particle_group_config["num_particles"] = 50
+        self.mana_coef = round(speed/10, 1)
         # self.particle_group_config["rebound"] = True
 
     def deliver(self, area: Area):
@@ -33,6 +34,9 @@ class ProjectileDelivery(DeliveryComponent):
 
 
 class InstantDelivery(DeliveryComponent):
+    def __init__(self):
+        super().__init__()
+        self.mana_coef = 2
 
     def deliver(self, area: Area):
         self.is_finished = True
