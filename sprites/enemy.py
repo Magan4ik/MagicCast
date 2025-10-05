@@ -2,7 +2,7 @@ from typing import Optional
 
 from base_classes.entity import Entity
 from settings.settings import *
-from ui.health_bar import EntityHealthBar
+from ui.resource_bars import EntityHealthBar
 from base_classes.game_sprite import GameSprite
 from pyglet.math import Vec2
 

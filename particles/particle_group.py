@@ -19,6 +19,8 @@ class ParticleGroup:
                  chaos: bool = False,
                  chaos_width: int = 50,
                  chaos_height: int = 50,
+                 chaos_circle: bool = False,
+                 chaos_radius: int = 50,
                  color_mod: tuple[float, float, float] = (1., 0., 0.),
                  color_secondary: Optional[tuple[float, float, float]] = None,
                  gradient_k: float = 3.0,
@@ -50,6 +52,17 @@ class ParticleGroup:
         self.center = (self.pos_x, self.pos_y)
         if not chaos:
             self.positions = np.full((self.num, 2), (self.pos_x, self.pos_y), dtype="f4")
+        elif chaos_circle:
+            chaos_radius_ndc_x = chaos_radius / self.win_width * 2
+            chaos_radius_ndc_y = chaos_radius / self.win_height * 2
+
+            rand_theta = np.random.uniform(0, 2 * np.pi, self.num)
+            rand_r = np.sqrt(np.random.uniform(0, 1, self.num))
+
+            x_offsets = rand_r * np.cos(rand_theta) * chaos_radius_ndc_x
+            y_offsets = rand_r * np.sin(rand_theta) * chaos_radius_ndc_y
+
+            self.positions = np.column_stack((self.pos_x + x_offsets, self.pos_y + y_offsets)).astype("f4")
         else:
             self.positions = np.column_stack(
                 (np.random.uniform(self.pos_x - chaos_width / win_width, self.pos_x + chaos_width / win_width, self.num),

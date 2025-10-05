@@ -7,7 +7,7 @@ from .effects import FixedDamage, Teleport
 fireball = BaseSpell("Fireball",
                      PointCast(),
                      ProjectileDelivery(speed=4, color=(int(0.769*255), int(0.055*255), int(0.055*255))),
-                     [InstanceTimeRule(FixedDamage(30)), PeriodTimeRule(FixedDamage(1), 4, 25)],
+                     [InstanceTimeRule(FixedDamage(20)), PeriodTimeRule(FixedDamage(1), 4, 10)],
                      cast_range=600,
                      radius=100
                      )
@@ -28,9 +28,9 @@ teleport = BaseSpell("Teleport",
                      radius=0)
 
 venom_finger = BaseSpell("Venom finger",
-                         PointCast(),
+                         TargetCast(),
                          InstantDelivery(),
-                         [PeriodTimeRule(FixedDamage(1), duration=2, repeats=5)],
+                         [InstanceTimeRule(FixedDamage(100))],
                          cast_range=500,
                          radius=0)
 
@@ -39,4 +39,4 @@ healing_aura = BaseSpell("Healing Aura",
                          InstantDelivery(),
                          [InstanceTimeRule(FixedDamage(-20)), PeriodTimeRule(FixedDamage(-2), 10, 20)],
                          cast_range=0,
-                         radius=500)
+                         radius=200)

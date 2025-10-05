@@ -6,25 +6,46 @@ from base_classes.entity import Entity
 from settings.settings import *
 
 
-class BaseHealthBar:
-
-    def __init__(self, max_hp: int, hp: int):
-        self.max_hp = max_hp
-        self._hp = hp
-        self._percent = round(self.hp / self.max_hp, 2)
+class BaseResourceBar:
+    def __init__(self, max_value: int, current_value: int):
+        self._max_value = max_value
+        self._current_value = current_value
+        self._percent = round(self._current_value / self._max_value, 2)
 
     @property
     def percent(self) -> float:
-        self._percent = round(self.hp / self.max_hp, 2)
+        self._percent = round(self._current_value / self._max_value, 2)
         return self._percent
+
+
+class BaseHealthBar(BaseResourceBar):
+
+    @property
+    def max_hp(self):
+        return self._max_value
 
     @property
     def hp(self) -> int:
-        return self._hp
+        return self._current_value
 
     @hp.setter
     def hp(self, value: int):
-        self._hp = max(0, value)
+        self._current_value = max(0, value)
+
+
+class BaseManaBar(BaseResourceBar):
+
+    @property
+    def mana_pool(self):
+        return self._max_value
+
+    @property
+    def mana(self) -> int:
+        return self._current_value
+
+    @mana.setter
+    def mana(self, value: int):
+        self._current_value = max(0, value)
 
 
 class PlayerHealthBar(pyglet.sprite.Sprite, BaseHealthBar):
@@ -102,3 +123,16 @@ class EntityHealthBar(pyglet.shapes.Rectangle, BaseHealthBar):
         self.update_bar()
         if self.batch is not self.entity.batch:
             self.batch = self.entity.batch
+
+
+class PlayerManaBar(pyglet.shapes.Rectangle, BaseManaBar):
+    def __init__(self, x: float, y: float, mana_pool: int, batch: Optional[pyglet.graphics.Batch] = None):
+        super().__init__(x, y, 462, 10, color=(100, 100, 255))
+        BaseManaBar.__init__(self, mana_pool, mana_pool)
+        self.max_width = self.width
+
+    def update(self, mana: int = None):
+        if mana is not None:
+            self.mana = mana
+        self.width = self.percent * self.max_width
+

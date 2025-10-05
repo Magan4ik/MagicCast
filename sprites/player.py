@@ -9,9 +9,8 @@ from pyglet.math import Vec2
 class Player(Entity):
     def __init__(self, img,
                  x: float, y: float, batch: Optional[pyglet.graphics.Batch],
-                 speed: int, hp: int = 100,
-                 mass: float = DEFAULT_MASS, elastic: float = 0, *args, **kwargs):
-        super().__init__(img, x, y, batch, speed, hp, mass=PLAYER_MASS, elastic=PLAYER_ELASTIC)
+                 speed: int, hp: int = 100, *args, **kwargs):
+        super().__init__(img, x, y, batch, speed, hp, *args, mass=PLAYER_MASS, elastic=PLAYER_ELASTIC, **kwargs)
 
     def control(self, dt):
         if KEYBOARD[key.D]:

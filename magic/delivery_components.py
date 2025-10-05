@@ -39,4 +39,17 @@ class InstantDelivery(DeliveryComponent):
         self.mana_coef = 2
 
     def deliver(self, area: Area):
+        if area.radius > 0:
+            self.particle_group_config["x"] = area.x
+            self.particle_group_config["y"] = area.y
+            self.particle_group_config["radius"] = area.radius
+            self.particle_group_config["life_time"] = 1
+            self.particle_group_config["chaos"] = True
+            self.particle_group_config["chaos_circle"] = True
+            self.particle_group_config["chaos_radius"] = area.radius
+            self.particle_group_config["brightness"] = 0.2
+            self.particle_group_config["num_particles"] = area.radius*2
+            self.particle_group_config["velocity_x_range"] = (0.1, 0.1)
+            self.particle_group_config["velocity_y_range"] = (0.1, 0.1)
+            self.particle_group_config["color_mod"] = (0.8, 0.3, 0.8)
         self.is_finished = True

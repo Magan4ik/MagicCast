@@ -17,4 +17,6 @@ def get_damage_color(damage: float) -> tuple:
                 clr.append(int(c*255))
             clr.append(255)
             return tuple(clr)
+    return tuple(int(c*255) for c in Color("red").rgb)
+
 

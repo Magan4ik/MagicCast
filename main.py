@@ -12,7 +12,7 @@ from sprites.enemy import Enemy
 from sprites.player import Player
 from pyglet.window import FPSDisplay, key
 
-from ui.health_bar import PlayerHealthBar
+from ui.resource_bars import PlayerHealthBar, PlayerManaBar
 from ui.hot_bar import HotBar
 from ui.item import Item, SpellItem
 from ui.storage import Storage, Staff
@@ -27,7 +27,7 @@ class Window(pyglet.window.Window):
         self.fps_display = FPSDisplay(self)
         self.push_handlers(KEYBOARD)
 
-        self.player = Player(player_animation, self.width // 2, self.height // 2, None, PLAYER_SPEED, 100)
+        self.player = Player(player_animation, self.width // 2, self.height // 2, None, PLAYER_SPEED, 100, mana=10000)
         self.enemy = Enemy(enemy_animation, self.width // 2 + 200, self.height // 2 - 150, None, PLAYER_SPEED, 100,
                            elastic=0.5)
         self.enemy2 = Enemy(enemy_animation, self.width // 2 + 400, self.height // 2, None, PLAYER_SPEED, 400,
@@ -37,12 +37,14 @@ class Window(pyglet.window.Window):
         self.healthbar = PlayerHealthBar(ui_images["player_health_bar"],
                                          self.width - ui_images["player_health_bar"].get_texture().width // 2 - 50,
                                          self.height - 50, max_hp=100, batch=None)
+        self.manabar = PlayerManaBar(self.width - ui_images["player_health_bar"].get_texture().width - 10,
+                                     self.height - 75, 10_000, batch=None)
 
         wood_staff_storage = Staff("wood_staff", item_images["staffs"]["wood_staff"],
                                    storage_images["staffs"]["wood_staff"], None, (50, 500), (150, 400), (50, 350))
-        wood_staff_storage.set_item(SpellItem(spell_icons[0], teleport, batch=None), 1)
-        wood_staff_storage.set_item(SpellItem(spell_icons[0], healing_aura, batch=None), 0)
-        wood_staff_storage.set_item(SpellItem(spell_icons[0], fireball, batch=None), 2)
+        wood_staff_storage.set_item(SpellItem(spell_icons[0], healing_aura, batch=None), 1)
+        wood_staff_storage.set_item(SpellItem(spell_icons[0], heal_hand, batch=None), 0)
+        wood_staff_storage.set_item(SpellItem(spell_icons[0], venom_finger, batch=None), 2)
         self.hotbar.set_item(wood_staff_storage, 2)
         self.selected_item = None
 
@@ -59,12 +61,21 @@ class Window(pyglet.window.Window):
 
         self.hitbox_mode = False
 
+        self.rest_time = 0
+
     def update(self, dt):
         self.selected_item = self.hotbar.get_selected_item()
         self.map_manager.update_entities(dt)
         self.map_manager.update_particles(self.camera, dt)
         self.enemy2.velocity = Vec2(4000 * dt, self.enemy2.velocity.y)
         self.healthbar.update(hp=self.player.hp)
+        self.manabar.update(mana=self.player.mana)
+        self.rest_time += dt
+        if self.rest_time >= 0.1:
+            self.rest_time = 0
+            self.player.hp += 0.1
+            self.player.mana += 100
+
         for chunk in self.map_manager.get_closes_chunks(self.player.x):
             for entity in chunk.entities:
                 if isinstance(entity, Item):
@@ -94,8 +105,13 @@ class Window(pyglet.window.Window):
         if isinstance(selected_item, Staff):
             item = selected_item.get_selected_item()
             if isinstance(item, SpellItem):
-                item.spell.cast((x, y), self.player, self.map_manager)
-                print(item.spell.mana_cost)
+                if self.player.mana >= item.spell.mana_cost:
+                    cst = item.spell.cast((x, y), self.player, self.map_manager)
+                    print(item.spell.mana_cost)
+                    if cst:
+                        self.player.mana -= item.spell.mana_cost
+                else:
+                    print("Not enough mana")
 
     def on_mouse_release(self, x, y, but, mod):
         pass
@@ -141,6 +157,7 @@ class Window(pyglet.window.Window):
             self.particle_factory.manager.draw()
         self.fps_display.draw()
         self.hotbar.draw()
+        self.manabar.draw()
         self.healthbar.draw()
         if self.selected_item is not None:
             self.selected_item.draw()

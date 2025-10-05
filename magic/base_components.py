@@ -50,7 +50,8 @@ class MagicComponent(ABC):
             "life_time": 0, "num_particles": 100,
             "velocity_x_range": (0.02, 1), "velocity_y_range": (0.02, 1),
             "angles": None,
-            "rebound": False, "loop": False, "chaos": False,
+            "rebound": False, "loop": False, "chaos": False, "chaos_circle": False,
+            "chaos_radius": 50,
             "chaos_width": 50, "chaos_height": 50,
             "color_mod": (1., 0., 0.),
             "color_secondary": None,
@@ -160,7 +161,7 @@ class BaseSpell(ABC):
 
     def _calculate_mana_cost(self):
         mana_cost = self.delivery_component.mana_coef * sum(com.get_mana_cost() for com in self.effect_components)
-        mana_cost += self.cast_range * 0.5 + self.radius * 0.5
+        mana_cost += self.cast_range * 0.5 + self.radius * 0.8
         return mana_cost
 
     def channeling(self):
@@ -180,8 +181,8 @@ class BaseSpell(ABC):
                 effect.handle(self.area.targets)
             self.reset()
 
-    def cast(self, mouse_pos: tuple[float, float], caster: GameSprite, map_manager: MapManager):
-        if self.casting: return
+    def cast(self, mouse_pos: tuple[float, float], caster: GameSprite, map_manager: MapManager) -> Optional[bool]:
+        if self.casting: return False
         self.map_manager = map_manager
         self.caster = caster
         self.cast_component.caster = caster
@@ -198,6 +199,7 @@ class BaseSpell(ABC):
             self.delivery_component.deliver(self.area)
             self.caster.active_spells.append(self)
             self.casting = True
+            return True
 
     def reset(self):
         self.area = None

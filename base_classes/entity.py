@@ -55,5 +55,9 @@ class Entity(GameSprite):
         self._hp = min(self.max_hp, max(0, value))
 
     @property
-    def mana(self):
+    def mana(self) -> int:
         return self._mana
+
+    @mana.setter
+    def mana(self, value: int):
+        self._mana = min(self.max_mana, max(0, value))
