@@ -1,4 +1,5 @@
 import math
+import time
 from typing import Optional
 
 import pyglet.image
@@ -158,11 +159,17 @@ class BaseSpell(ABC):
         self.map_manager: Optional[MapManager] = None
         self.radius = radius
         self.mana_cost = self._calculate_mana_cost()
+        self.cooldown = self.mana_cost // 100
+        self.last_usage = None
 
     def _calculate_mana_cost(self):
         mana_cost = self.delivery_component.mana_coef * sum(com.get_mana_cost() for com in self.effect_components)
         mana_cost += self.cast_range * 0.5 + self.radius * 0.8
         return mana_cost
+
+    def get_cooldown_progress(self) -> float:
+        if self.last_usage is None: return 1
+        return min((time.time() - self.last_usage) / self.cooldown, 1)
 
     def channeling(self):
         self.area.update_pos()
@@ -183,6 +190,7 @@ class BaseSpell(ABC):
 
     def cast(self, mouse_pos: tuple[float, float], caster: GameSprite, map_manager: MapManager) -> Optional[bool]:
         if self.casting: return False
+        if self.last_usage and time.time() - self.last_usage <= self.cooldown: return False
         self.map_manager = map_manager
         self.caster = caster
         self.cast_component.caster = caster
@@ -199,6 +207,7 @@ class BaseSpell(ABC):
             self.delivery_component.deliver(self.area)
             self.caster.active_spells.append(self)
             self.casting = True
+            self.last_usage = time.time()
             return True
 
     def reset(self):
