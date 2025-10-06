@@ -46,6 +46,7 @@ class ParticleGroup:
         self.zoom = zoom
         chaos_width *= zoom
         chaos_height *= zoom
+        chaos_radius *= zoom
 
         self.pos_x = x / win_width * 2 - 1
         self.pos_y = y / win_height * 2 - 1
