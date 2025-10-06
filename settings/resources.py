@@ -57,7 +57,10 @@ ui_images = {
 }
 
 resize_and_center_image(ui_images["player_health_bar"], 512, 64)
-
+resize_and_center_image(ui_images["hotbar_start"], 64, 64)
+resize_and_center_image(ui_images["hotbar_end"], 64, 64)
+resize_and_center_image(ui_images["hotbar_slot"], 64, 64)
+resize_and_center_image(ui_images["hotbar_slot_selected"], 64, 64)
 
 # ITEMS
 item_images = {
