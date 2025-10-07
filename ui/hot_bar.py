@@ -6,7 +6,8 @@ from map.map_manager import MapManager
 from settings.settings import *
 from sprites.player import Player
 from ui.item import Item
-from ui.storage import Storage, Slot
+from ui.storage import Storage
+from ui.slots import Slot
 
 
 class HotBar:
@@ -31,7 +32,7 @@ class HotBar:
         }
         self.slots = [
                 Slot(self.slot_image, self.slot_selected_image, x + self.width * i, y, batch=self.batch,
-                     group=self.background_group)
+                     group=self.background_group, name_shift=-40)
                 for i in range(1, slots_amount + 1)
         ]
 
@@ -50,22 +51,41 @@ class HotBar:
     def set_item(self, item: Item, position: Optional[int] = None):
         if position is None:
             for i, slot in enumerate(self.slots, 1):
-                if slot.item is None:
+                if slot.item is not None and slot.item.stackable and slot.item.name == item.name:
                     position = i
                     break
+            else:
+                for i, slot in enumerate(self.slots, 1):
+                    if slot.item is None:
+                        position = i
+                        break
+                else:
+                    return
         slot = self.slots[position - 1]
         slot.set_item(item)
         item.owner = self.owner
+        item.name_shift = -40
+        item.selected = self.selected_slot == position - 1
 
-    def throw_item(self, map_manager: MapManager):
+    def remove_item(self, position: int, amount: int):
+        position = max(0, min(position, len(self.slots)))
+        items = self.slots[position - 1].remove_item(amount)
+        return items
+
+    def throw_item(self, map_manager: MapManager, all_items=False):
         item = self.get_selected_item()
         if item:
-            self.slots[self.selected_slot].item = None
-            item.throw()
-            map_manager.add_entity(item)
+            amount = self.slots[self.selected_slot].amount if all_items else 1
+            items = self.remove_item(self.selected_slot + 1, amount)
+            for item in items:
+                item.throw()
+                map_manager.add_entity(item)
 
     def get_selected_item(self) -> Optional[Item]:
         return self.slots[self.selected_slot].item
 
     def draw(self):
-        self.batch.draw()
+        self.sprites["start"].draw()
+        self.sprites["end"].draw()
+        for slot in self.slots:
+            slot.draw()

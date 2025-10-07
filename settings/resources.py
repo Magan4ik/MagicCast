@@ -64,7 +64,8 @@ resize_and_center_image(ui_images["hotbar_slot_selected"], 64, 64)
 
 # ITEMS
 item_images = {
-    "staffs": {"wood_staff": pyglet.image.load("textures/items/wood_staff_icon.png")}
+    "staffs": {"wood_staff": pyglet.image.load("textures/items/wood_staff_icon.png")},
+    "shards": {"fire_shard": pyglet.image.load("textures/items/fire_shard.png")},
 }
 for category in item_images.values():
     for item in category.values():

@@ -3,50 +3,14 @@ from typing import Optional
 import pyglet.sprite
 
 from settings.settings import *
-from ui.item import Item, SpellItem
-
-
-class Slot(pyglet.sprite.Sprite):
-    def __init__(self, img: pyglet.image.AbstractImage, selected_img: pyglet.image.AbstractImage, x: float, y: float, batch: Optional[pyglet.graphics.Batch], group: Optional[pyglet.graphics.Group] = None):
-        super().__init__(img, x, y, batch=batch, group=group)
-        self.item: Optional[Item] = None
-        self.default_image = img
-        self.selected_image = selected_img
-
-    def select(self):
-        self.image = self.selected_image
-        if self.item is not None:
-            self.item.selected = True
-
-    def unselect(self):
-        self.image = self.default_image
-        if self.item is not None:
-            self.item.selected = False
-
-    def set_item(self, item: Item):
-        self.item = item
-        self.item.x = self.x
-        self.item.y = self.y
-        self.item.batch = self.batch
-
-    def remove_item(self):
-        item = self.item
-        self.item = None
-        return item
-
-    def is_empty(self):
-        return self.item is None
-
-    def draw(self):
-        super().draw()
-        if self.item is not None:
-            self.item.draw()
+from ui.item import Item
+from ui.slots import Slot, SpellSlot
 
 
 class Storage(Item):
     def __init__(self, name: str, img: pyglet.image.AbstractImage, storage_image: pyglet.image.AbstractImage,
                  batch: Optional[pyglet.graphics.Batch], *slots):
-        super().__init__(name, img, batch)
+        super().__init__(name, img, batch, False)
         self.slots_amount = len(slots)
         self.slot_batch = pyglet.graphics.Batch()
         self.storage_sprite = pyglet.sprite.Sprite(storage_image, 100, 350)
@@ -62,12 +26,19 @@ class Storage(Item):
             self.selected_slot = min(index, len(self.slots) - 1)
             for slot in self.slots:
                 slot.image = spell_slot
+                if slot.item:
+                    slot.item.selected = False
             self.slots[self.selected_slot].image = spell_slot_selected
+            if self.slots[self.selected_slot].item:
+                self.slots[self.selected_slot].item.selected = True
 
     def set_item(self, item: Item, index: int):
         self.slots[index].set_item(item)
+        if index == self.selected_slot:
+            item.selected = True
 
     def draw(self):
+        super().draw()
         if self.selected:
             self.storage_sprite.draw()
             for slot in self.slots:
@@ -75,4 +46,7 @@ class Storage(Item):
 
 
 class Staff(Storage):
-    pass
+    def __init__(self, name: str, img: pyglet.image.AbstractImage, storage_image: pyglet.image.AbstractImage,
+                 batch: Optional[pyglet.graphics.Batch], *slots):
+        super().__init__(name, img, storage_image, batch, *slots)
+        self.slots = [SpellSlot(spell_slot, spell_slot_selected, pos[0], pos[1], batch=self.slot_batch) for pos in slots]

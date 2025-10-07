@@ -40,12 +40,15 @@ class Window(pyglet.window.Window):
         self.manabar = PlayerManaBar(self.width - ui_images["player_health_bar"].get_texture().width - 10,
                                      self.height - 75, 10_000, batch=None)
 
-        wood_staff_storage = Staff("wood_staff", item_images["staffs"]["wood_staff"],
+        wood_staff_storage = Staff("Wood staff", item_images["staffs"]["wood_staff"],
                                    storage_images["staffs"]["wood_staff"], None, (50, 500), (150, 400), (50, 350))
         wood_staff_storage.set_item(SpellItem(spell_icons[0], healing_aura, batch=None), 1)
         wood_staff_storage.set_item(SpellItem(spell_icons[0], teleport, batch=None), 0)
         wood_staff_storage.set_item(SpellItem(spell_icons[0], fireball, batch=None), 2)
+        fire_shard = Item("Fire shard", item_images["shards"]["fire_shard"], None)
         self.hotbar.set_item(wood_staff_storage, 2)
+        self.hotbar.set_item(fire_shard, 9)
+        self.hotbar.set_item(fire_shard, 9)
         self.selected_item = None
 
         self.camera = TargetCamera(self, self.player, scroll_speed=1, min_zoom=1, max_zoom=4)
@@ -94,7 +97,7 @@ class Window(pyglet.window.Window):
             if isinstance(selected_item, Staff):
                 selected_item.update_selected(SPELL_KEYS[sym])
         if sym == key.Q:
-            self.hotbar.throw_item(self.map_manager)
+            self.hotbar.throw_item(self.map_manager, all_items=bool(mod & key.MOD_CTRL))
 
         if sym == key.H and mod & key.MOD_CTRL:
             self.hitbox_mode = not self.hitbox_mode
