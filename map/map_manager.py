@@ -56,6 +56,11 @@ class MapManager:
             if key in self.chunks:
                 yield self.chunks[key]
 
+    def get_chunk(self, x):
+        x = (x // MAP_CELL_SIZE) * MAP_CELL_SIZE
+        x = x // (CHUNK_SIZE * MAP_CELL_SIZE)
+        return self.chunks[x]
+
     def load_map_from_bat(self):
         with open("map_sheets/map2.bat", "rb") as f:
             tiles: list[dict] = pickle.load(f)

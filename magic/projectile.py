@@ -5,6 +5,7 @@ import math
 
 from base_classes.game_sprite import GameSprite
 from magic.base_components import Area, DeliveryComponent
+from map.map_manager import MapManager
 from settings.settings import *
 
 
@@ -19,7 +20,7 @@ class Projectile(pyglet.sprite.Sprite):
         self.velocity = Vec2(0, speed)
         self.deliver = deliver
 
-    def channeling(self):
+    def channeling(self, map_manager: MapManager):
         direction = (Vec2(self.target.x, self.target.y) - Vec2(self.x, self.y)).normalize()
         self.velocity = direction * self.velocity.length()
         self.x += self.velocity.x
@@ -28,6 +29,13 @@ class Projectile(pyglet.sprite.Sprite):
 
         if distance <= MAP_CELL_SIZE:
             self.kill()
+
+        for sprite in map_manager.get_chunk(self.x).sprites:
+            if sprite.collide_point((self.x, self.y)):
+                self.kill()
+                self.target.x = self.x
+                self.target.y = self.y
+                self.target.target = None
 
     def kill(self):
         self.deliver.is_finished = True

@@ -134,9 +134,9 @@ class DeliveryComponent(MagicComponent, ABC):
         self.is_finished = False
         self.mana_coef = 1
 
-    def channeling(self):
-        if self.channeling is not None:
-            self.channeling_object.channeling()
+    def channeling(self, map_manager: MapManager):
+        if self.channeling_object is not None:
+            self.channeling_object.channeling(map_manager)
 
     @abstractmethod
     def deliver(self, area: Area):
@@ -176,7 +176,7 @@ class BaseSpell(ABC):
         if self.area is None: return
 
         if not self.delivery_component.is_finished:
-            self.delivery_component.channeling()
+            self.delivery_component.channeling(self.map_manager)
         else:
             if self.area.targets is None:
                 particle_config = self.delivery_component.get_particle_config()
