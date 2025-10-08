@@ -2,7 +2,6 @@ from typing import Optional
 
 from base_classes.entity import Entity
 from settings.settings import *
-from base_classes.game_sprite import GameSprite
 from pyglet.math import Vec2
 
 
@@ -14,12 +13,12 @@ class Player(Entity):
 
     def control(self, dt):
         if KEYBOARD[key.D]:
-            if abs(self.velocity.x) < self.speed:
-                self.velocity = Vec2(self.speed*dt, self.velocity.y)
+            if abs(self.velocity.x) < self.speed*dt:
+                self.velocity = Vec2(self.velocity.x + self.speed*dt/10, self.velocity.y)
             self.scale_x = 1
         elif KEYBOARD[key.A]:
-            if abs(self.velocity.x) < self.speed:
-                self.velocity = Vec2(-self.speed*dt, self.velocity.y)
+            if abs(self.velocity.x) < self.speed*dt:
+                self.velocity = Vec2(self.velocity.x - self.speed*dt/10, self.velocity.y)
             self.scale_x = -1
 
         if KEYBOARD[key.SPACE]:
