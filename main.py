@@ -65,12 +65,18 @@ class Window(pyglet.window.Window):
         self.hitbox_mode = False
 
         self.rest_time = 0
+        self.accumulator = 0
+        self.fixed_dt = 1/60
 
     def update(self, dt):
+        self.accumulator += dt
+        while self.accumulator >= self.fixed_dt:
+            self.map_manager.update_entities(self.fixed_dt)
+            self.map_manager.update_particles(self.camera, self.fixed_dt)
+            self.enemy2.velocity = Vec2(4000 * self.fixed_dt, self.enemy2.velocity.y)
+            self.accumulator -= self.fixed_dt
+
         self.selected_item = self.hotbar.get_selected_item()
-        self.map_manager.update_entities(dt)
-        self.map_manager.update_particles(self.camera, dt)
-        self.enemy2.velocity = Vec2(4000 * dt, self.enemy2.velocity.y)
         self.healthbar.update(hp=self.player.hp)
         self.manabar.update(mana=self.player.mana)
         self.rest_time += dt
